@@ -1,0 +1,93 @@
+name: Build Android APK
+# Wraps web/ in a Capacitor shell, bundles Tone.js + MediaPipe + the hand model
+# so the app works offline, then publishes handloom.apk as a GitHub Release.
+on:
+  push:
+    branches: [main]
+    paths: ['web/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: android-actions/setup-android@v3
+
+      - name: Assemble offline web bundle
+        run: |
+          mkdir -p app && cd app
+          npm init -y >/dev/null
+          npm i @capacitor/core@8 @capacitor/cli@8 @capacitor/android@8 tone@15.1.22 @mediapipe/tasks-vision@0.10.35
+          mkdir -p www/vendor/mp
+          cp -r ../web/. www/
+          rm -f www/sw.js
+          cp node_modules/tone/build/Tone.js www/vendor/
+          cp node_modules/@mediapipe/tasks-vision/vision_bundle.mjs www/vendor/mp/
+          cp -r node_modules/@mediapipe/tasks-vision/wasm www/vendor/mp/
+          curl -fsSL -o www/vendor/hand_landmarker.task \
+            https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task
+          sed -i \
+            -e 's#https://cdn.jsdelivr.net/npm/tone@15.1.22/build/Tone.js#vendor/Tone.js#' \
+            -e 's#https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35#./vendor/mp#' \
+            -e 's#https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task#./vendor/hand_landmarker.task#' \
+            www/index.html
+          grep -c 'vendor/' www/index.html
+
+      - name: Create Android project
+        working-directory: app
+        run: |
+          echo '{"appId":"com.gabicus.handloom","appName":"Handloom","webDir":"www"}' > capacitor.config.json
+          npx cap add android
+          npx cap sync android
+          M=android/app/src/main/AndroidManifest.xml
+          sed -i 's#<uses-permission android:name="android.permission.INTERNET" />#<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />\n    <uses-feature android:name="android.hardware.microphone" android:required="false" />#' $M
+          grep -n 'permission\|feature' $M
+          # launcher icons from the web icon (legacy PNGs; drop adaptive xml)
+          R=android/app/src/main/res
+          rm -rf $R/mipmap-anydpi-v26
+          for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+            n=${d%%:*}; s=${d##*:}
+            convert ../web/icon-512.png -resize ${s}x${s} $R/mipmap-$n/ic_launcher.png
+            cp $R/mipmap-$n/ic_launcher.png $R/mipmap-$n/ic_launcher_round.png
+            rm -f $R/mipmap-$n/ic_launcher_foreground.png
+          done
+
+      - name: Signing key (stable if secret set, else fresh)
+        env:
+          KS: ${{ secrets.ANDROID_DEBUG_KEYSTORE_B64 }}
+        run: |
+          mkdir -p ~/.android
+          if [ -n "$KS" ]; then echo "$KS" | base64 -d > ~/.android/debug.keystore; echo "using stored key"; else echo "no stored key; gradle makes a fresh one"; fi
+
+      - name: Build APK
+        working-directory: app/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk ../../handloom.apk
+          ls -la ../../handloom.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: handloom-apk
+          path: handloom.apk
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: Handloom Android build ${{ github.run_number }}
+          body: |
+            Sideload build of Handloom for Android. Download **handloom.apk** on the phone, open it, and allow "install unknown apps" for your browser or Files app when asked.
+            Built from ${{ github.sha }}.
+          files: handloom.apk
+          make_latest: true
