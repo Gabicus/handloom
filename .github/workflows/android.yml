@@ -4,7 +4,7 @@ name: Build Android APK
 on:
   push:
     branches: [main]
-    paths: ['web/**', '.github/workflows/android.yml']
+    paths: ['web/**', 'android-res/**', '.github/workflows/android.yml']
   workflow_dispatch:
 permissions:
   contents: write
@@ -55,15 +55,8 @@ jobs:
           # launcher icons from the web icon (legacy PNGs; drop adaptive xml)
           R=android/app/src/main/res
           rm -rf $R/mipmap-anydpi-v26
-          IM=$(command -v magick || command -v convert || true)
-          if [ -n "$IM" ]; then
-          for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
-            n=${d%%:*}; s=${d##*:}
-            $IM ../web/icon-512.png -resize ${s}x${s} $R/mipmap-$n/ic_launcher.png
-            cp $R/mipmap-$n/ic_launcher.png $R/mipmap-$n/ic_launcher_round.png
-            rm -f $R/mipmap-$n/ic_launcher_foreground.png
-          done
-          else echo 'no ImageMagick; keeping default icons'; fi
+          cp -r ../android-res/. $R/
+          rm -f $R/mipmap-*/ic_launcher_foreground.png
 
       - name: Signing key (stable if secret set, else fresh)
         env:
