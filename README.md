@@ -10,6 +10,32 @@ Everything runs in the browser. Camera and mic never leave the device.
 **Play it:** https://gabicus.github.io/handloom/
 **Android app:** https://github.com/Gabicus/handloom/releases/latest/download/handloom.apk
 
+
+## What's new in v2
+- **Guide:** press **? Guide**, or **▶ Watch how it plays** on the start screen. A 10-step walkthrough where ghost hands drive the real engine while a demo singer stands in for your voice. Each step has **Try it yourself**, which checks your own hand, and **▶ play walkthrough** advances on its own.
+- **Sound strip:** a scrolling spectrogram, your dry voice vs. the processed output, in/out meters with peak hold and a clip light, and a line for every knob that's moving.
+- **Lighter:**
+  - Hand tracking runs in a Web Worker.
+  - Effects that are switched off are taken out of the audio graph completely.
+  - The camera look is done by the GPU (CSS).
+  - Audio parameters update at 30 Hz.
+  - Auto quality steps down if frames get slow.
+  - About 5× less main-thread work than v1 in testing.
+- **Reviewed by a sound designer, a mix engineer and a gesture-performance expert:**
+  - Vocal input chain (HPF, compressor, de-ess).
+  - Tape-style warmth.
+  - Harmonizer: tighter, panned and ducked.
+  - Delay and reverb as sends, with tone filters inside the echo loop.
+  - A real limiter.
+  - Loop seams without clicks.
+  - Voice levels balanced.
+  - One Euro smoothing on the hands.
+  - Left and right tracked by hand, so you can cross them.
+  - Holding a sign freezes that hand's knobs.
+  - A sign can't re-fire after a tracking flicker.
+  - A hold ring shows when a sign is about to trigger.
+- **Album skin:** Settings → Album skin. Drop in cover art and the palette re-colours everything.
+
 ## Layout
 
 - `web/`: the whole app (one `index.html` plus a PWA manifest, service worker and icons). Pushing to `main` deploys it to Pages.

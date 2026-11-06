@@ -59,10 +59,57 @@ select{background:#f6eedc;border:1.5px solid var(--ink2);border-radius:4px;paddi
 #presetSel{font-family:var(--fell);font-size:18px;max-width:230px}
 .spacer{flex:1}
 main{display:grid;grid-template-columns:1fr 430px;min-height:0}
-#stageWrap{position:relative;min-height:0;overflow:hidden;background:#1d150f}
-#stage{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
-video#cam{position:absolute;width:2px;height:2px;opacity:0;pointer-events:none}
-#hud{position:absolute;left:10px;top:10px;pointer-events:none;font-family:var(--hand);font-size:24px;color:var(--ink);background:#efe4cce6;border:1.5px solid var(--ink2);border-radius:4px;padding:4px 12px 6px;max-width:min(470px,calc(100% - 120px));box-shadow:3px 3px 0 #3b2a1e33;transition:opacity .6s}
+#leftCol{display:grid;grid-template-rows:1fr auto;min-height:0;min-width:0}
+#stageWrap{position:relative;min-height:0;overflow:hidden;background:var(--paper)}
+#stage{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block;z-index:3}
+/* camera look is done by the GPU (CSS), not per-pixel canvas work */
+video#cam{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:sepia(.45) saturate(.55) contrast(1.05) brightness(1.04);opacity:0;pointer-events:none;transition:opacity .4s}
+#paint{position:absolute;inset:0;width:100%;height:100%;mix-blend-mode:multiply;pointer-events:none;filter:blur(1.2px);z-index:1}
+#paperFx{position:absolute;inset:0;pointer-events:none;z-index:2;opacity:.85;
+  background:radial-gradient(ellipse at center, rgba(0,0,0,0) 52%, rgba(60,40,20,.42) 100%),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .35 0 0 0 0 .22 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+#scope{display:block;width:100%;height:118px;border-top:2px solid var(--ink);background:var(--paper)}
+body.mobile #scope{height:64px}
+#hud,#modeBadge{z-index:4}
+#hud .legend{font-size:17px;line-height:1.12;margin:2px 0 3px;color:var(--ink)}
+#hud .blurb{font-size:17px!important}
+body.tutoring #hud .blurb{display:none}
+body.tutoring #modeBadge{display:none}
+#hud .legend b{font-family:var(--fell);font-weight:400;font-size:16px}
+#hud .legend .signs{color:var(--madder);font-size:17px}
+body.mobile #hud .legend{font-size:16px}
+#tut{position:absolute;left:12px;bottom:12px;width:min(440px,calc(100% - 24px));z-index:6;padding:10px 14px 12px;border:2px solid var(--ink);border-radius:6px;box-shadow:4px 4px 0 var(--madder)}
+body.mobile #tut{bottom:6px;left:6px;width:calc(100% - 12px);padding:6px 10px 8px}
+body.mobile #tut h3{font-size:20px;margin:0 0 2px}
+body.mobile #tut p{font-size:14.5px;line-height:1.22;margin:2px 0}
+body.mobile #tut p.listen{font-size:16.5px}
+body.mobile #tut .tutNav{margin-top:5px}
+body.mobile #tut .btn{padding:4px 10px;font-size:15px}
+body.mobile.tutoring #hud{display:none}
+#pad .dot.ghostDot{border-color:var(--indigo);background:#2f4a6b33}
+#tut h3{font-family:var(--fell);font-weight:400;font-size:26px;margin:2px 0 4px}
+#tut p{margin:4px 0;font-size:17px;line-height:1.3}
+#tut p.listen{font-family:var(--hand);font-size:20px;color:var(--indigo);line-height:1.1}
+#tut .tutTop{display:flex;align-items:center;gap:8px}
+#tut .tutNum{font-family:var(--hand);font-size:18px;color:var(--faint)}
+#tut .dots{flex:1;display:flex;gap:5px}
+#tut .dots i{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--ink2);cursor:pointer}
+#tut .dots i.done{background:var(--paper3)} #tut .dots i.on{background:var(--madder);border-color:var(--madder)}
+#tut .tutNav{display:flex;gap:6px;justify-content:space-between;margin-top:8px}
+#tut .tryRow{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
+#tut .tryMsg{font-family:var(--hand);font-size:19px;color:var(--sage)}
+#tut .tutBar{height:3px;background:var(--paper3);margin-top:8px;border-radius:2px;overflow:hidden}
+#tut .tutBar i{display:block;height:100%;width:0;background:var(--madder);transition:width .1s linear}
+.step-enter > *{opacity:0;transform:translateY(8px);animation:rise .45s ease forwards}
+.step-enter > *:nth-child(2){animation-delay:.07s} .step-enter > *:nth-child(3){animation-delay:.16s} .step-enter > *:nth-child(4){animation-delay:.32s}
+.step-enter > *:nth-child(5){animation-delay:.42s} .step-enter > *:nth-child(6){animation-delay:.5s} .step-enter > *:nth-child(7){animation-delay:.56s}
+@keyframes rise{to{opacity:1;transform:none}}
+.guidePrompt{position:absolute;left:50%;top:44%;transform:translateX(-50%);z-index:6;padding:10px 14px;border:2px solid var(--ink);border-radius:6px;box-shadow:4px 4px 0 var(--madder);display:flex;gap:10px;align-items:center;font-family:var(--fell);font-size:20px;animation:rise .5s ease forwards;opacity:0}
+.startRow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.startRow .bigbtn{margin:0}
+.bigbtn.ghost{background:var(--paper);color:var(--ink);border:2px solid var(--ink)}
+.artThumb{background-size:cover;background-position:center}
+#hud{position:absolute;left:10px;top:10px;pointer-events:none;font-family:var(--hand);font-size:24px;color:var(--ink);background:#efe4cce6;border:1.5px solid var(--ink2);border-radius:4px;padding:4px 12px 6px;max-width:min(420px,calc(100% - 110px));box-shadow:3px 3px 0 #3b2a1e33;transition:opacity .6s}
 #hud .blurb{transition:max-height .6s, opacity .6s;max-height:200px;overflow:hidden}
 #hud.quiet .blurb{max-height:0;opacity:0}
 body.mobile #hud .pname{font-size:22px} body.mobile #hud .blurb{font-size:17px}
@@ -124,6 +171,7 @@ kbd{font-family:var(--hand);font-size:17px;border:1px solid var(--faint);border-
 
 /* ---------- mobile ---------- */
 body.mobile main{grid-template-columns:1fr;grid-template-rows:1fr auto}
+body.mobile header .pill{padding:3px 8px;font-size:15px}
 body.mobile aside{display:none}
 body.mobile header .brand{font-size:21px}
 body.mobile header{gap:6px;padding:6px 8px}
@@ -148,6 +196,7 @@ body.mobile #dock{display:grid;grid-template-columns:44% 1fr;gap:8px;padding:8px
 <!-- ======== SPLASH ======== -->
 <div id="splash">
   <div class="card paper">
+    <div class="artThumb" style="display:none;width:110px;height:110px;margin:0 auto 10px;border:2px solid var(--ink);border-radius:4px;box-shadow:3px 3px 0 var(--madder)"></div>
     <h1>Handloom</h1>
     <svg class="flourish" viewBox="0 0 260 26"><path d="M4 13 C40 -4 70 30 130 13 S220 -4 256 13" fill="none" stroke="#a3402f" stroke-width="2" stroke-dasharray="6 4"/><circle cx="130" cy="13" r="4" fill="#c08a2c"/><circle cx="60" cy="13" r="2.5" fill="#2f4a6b"/><circle cx="200" cy="13" r="2.5" fill="#2f4a6b"/></svg>
     <div class="sub">a hand-woven instrument — sing, pinch, sway, and loop</div>
@@ -164,8 +213,9 @@ body.mobile #dock{display:grid;grid-template-columns:44% 1fr;gap:8px;padding:8px
       </button>
     </div>
     <div class="note"><b>Wear headphones.</b> Your mic runs through the effects live, and speakers will feed back. Camera and mic stay in your browser. Nothing is uploaded.</div>
-    <div class="note" id="sandboxNote" style="display:none"><b>Preview mode:</b> this page can't reach a camera or mic here, so your mouse or finger plays the hands instead. Hover moves a hand and pressing pinches it. Load a vocal stem in the Library to hear the effects on a voice. Open the full version for the real thing.</div>
-    <button class="bigbtn" id="startBtn">Begin weaving</button>
+    <div class="note" id="sandboxNote" style="display:none"><b>Preview mode:</b> this page can't reach a camera or mic here, so your mouse or finger plays the hands instead. Hover moves a hand and pressing pinches it. A demo singer stands in for your voice. Open the full version for the real thing.</div>
+    <div class="startRow"><button class="bigbtn" id="startBtn">Begin weaving</button><button class="bigbtn ghost" id="watchBtn">▶ Watch how it plays</button></div>
+    <div class="hint" style="text-align:center">The walkthrough uses a demo singer, so no mic is needed. Ghost hands show each move and you hear what it does.</div>
     <div id="loadmsg"></div>
     <div id="apkLink">On Android? <a href="https://github.com/Gabicus/handloom/releases/latest/download/handloom.apk">Download the Handloom app (APK)</a></div>
   </div>
@@ -183,16 +233,24 @@ body.mobile #dock{display:grid;grid-template-columns:44% 1fr;gap:8px;padding:8px
     <span class="pill" id="freezeBtn" title="Freeze all threads (F)">❄</span>
     <span class="pill" id="micBtn" title="Mic on/off">🎙 Mic</span>
     <span class="pill hide-m" id="takeBtn" title="Record a take of everything to a file">● Take</span>
+    <span class="pill" id="demoBtn" title="A stand-in singer so you can hear the rack without a mic">♪ Demo</span>
     <span class="spacer"></span>
+    <span class="pill" id="guideBtn" title="Walkthrough (?)">? Guide</span>
     <span class="pill hide-m" id="saveBtn" title="Save as your own preset">✎ Save</span>
     <span class="pill hide-m" id="ioBtn" title="Export / import presets">⇅</span>
   </header>
   <main>
-    <div id="stageWrap">
-      <canvas id="stage"></canvas>
-      <video id="cam" playsinline muted></video>
-      <div id="hud"><div class="pname" id="hudName"></div><div class="blurb" id="hudBlurb"></div></div>
-      <div id="modeBadge"></div>
+    <div id="leftCol">
+      <div id="stageWrap">
+        <video id="cam" playsinline muted></video>
+        <canvas id="paint"></canvas>
+        <div id="paperFx"></div>
+        <canvas id="stage"></canvas>
+        <div id="hud"><div class="pname" id="hudName"></div><div class="legend" id="hudLegend"></div><div class="blurb" id="hudBlurb"></div></div>
+        <div id="modeBadge"></div>
+        <div id="tut" class="paper hidden"></div>
+      </div>
+      <canvas id="scope"></canvas>
     </div>
     <aside class="paper">
       <div class="tabs" id="tabs"></div>
@@ -261,7 +319,7 @@ const S = {
   mode: 'desktop', started: false, sandbox: false,
   settings: Object.assign({
     key: 2, scale: 'Major', mirror: true, swap: false, showVideo: true, videoAlpha: 0.9, paint: 0.8,
-    poseHold: 450, conf: 0.5, monitor: true, speakerMode: false, midiOut: '', showSkeleton: true
+    poseHold: 450, conf: 0.5, monitor: true, speakerMode: false, midiOut: '', showSkeleton: true, quality: 'auto', perfHud: false, scope: true, identity: 'hand'
   }, store.get('settings', {})),
   preset: null, presetName: '', fxOn: {}, routes: [], lfos: [], voice: { id: 'none' },
   poses: null, frozen: false, micOn: false, camOn: false, trackerReady: false, pointerHands: false,
@@ -273,21 +331,28 @@ const saveSettings = () => store.set('settings', S.settings);
 
 /* =====================================================================
    AUDIO ENGINE
+   Signal flow (mix-engineer order, true bypass for anything switched off):
+   mic → HPF·comp·de-ess ─┐
+   backing / demo singer ─┴→ vocalBus → [Hearth] → [Harmonizer] → merge ← synth voices
+   merge → [Muffle] → [Warble] → [Chorus] → [Phaser] → [Tremolo] → [Sway] → preSend
+   preSend → dry ─────────────────────────────┐
+   preSend → [Canyon send] ───────────────────┤→ fxOut → live → master ← loops
+   preSend → [Barn send] ─────────────────────┘          master → limiter → out (+ takes, meters, scope)
    ===================================================================== */
 const A = {};   // nodes
 const PARAMS = {}; // id -> param
 const PARAM_ORDER = [];
 const FX = [
-  { id: 'harm', name: 'Harmonizer', color: '#7a4a6b', params: [['mix','Blend',0,1,0],['a','Voice I',-12,12,4,'int'],['b','Voice II',-12,12,7,'int']] },
-  { id: 'warm', name: 'Hearth', sub: 'warm drive', color: '#b5652b', params: [['mix','Blend',0,1,.5],['drive','Drive',0,1,.25]] },
-  { id: 'filt', name: 'Muffle', sub: 'filter', color: '#6f8a5a', params: [['mix','Blend',0,1,1],['freq','Cutoff',120,14000,6000,'exp'],['q','Resonance',.5,14,1,'exp']] },
-  { id: 'vib',  name: 'Warble', sub: 'vibrato', color: '#c08a2c', params: [['mix','Blend',0,1,1],['rate','Rate',.5,12,5,'exp'],['depth','Depth',0,1,.15]] },
-  { id: 'chor', name: 'Chorus', color: '#4f7d7a', params: [['mix','Blend',0,1,.5],['rate','Rate',.1,8,1.5,'exp'],['depth','Depth',0,1,.6]] },
-  { id: 'phas', name: 'Phaser', color: '#6a5a8c', params: [['mix','Blend',0,1,.5],['rate','Rate',.05,8,.5,'exp'],['oct','Octaves',1,6,3]] },
-  { id: 'trem', name: 'Tremolo', color: '#a3402f', params: [['mix','Blend',0,1,.6],['rate','Rate',.5,20,6,'exp'],['depth','Depth',0,1,.85]] },
-  { id: 'pan',  name: 'Sway', sub: 'auto-pan', color: '#2f4a6b', params: [['mix','Blend',0,1,.8],['rate','Rate',.05,10,.8,'exp'],['depth','Depth',0,1,1]] },
-  { id: 'dly',  name: 'Canyon', sub: 'echo', color: '#4a6a8a', params: [['mix','Blend',0,1,.3],['time','Time',.05,1.2,.35],['fb','Feedback',0,.92,.4]] },
-  { id: 'rev',  name: 'Barn', sub: 'reverb', color: '#5b6b4a', params: [['mix','Blend',0,1,.25]] }
+  { id: 'warm', name: 'Hearth', sub: 'tape warmth', color: '#b5652b', kind: 'pre', params: [['mix','Blend',0,1,.6],['drive','Drive',0,1,.3]] },
+  { id: 'harm', name: 'Harmonizer', color: '#7a4a6b', kind: 'pre', params: [['mix','Blend',0,1,0],['a','Voice I',-12,12,7,'int'],['b','Voice II',-12,12,-5,'int']] },
+  { id: 'filt', name: 'Muffle', sub: 'filter', color: '#6f8a5a', kind: 'post', params: [['mix','Amount',0,1,1],['freq','Cutoff',120,14000,6000,'exp'],['q','Resonance',.5,10,.9,'exp']] },
+  { id: 'vib',  name: 'Warble', sub: 'vibrato', color: '#c08a2c', kind: 'post', params: [['mix','Blend',0,1,1],['rate','Rate',.5,12,5,'exp'],['depth','Depth',0,1,.15]] },
+  { id: 'chor', name: 'Chorus', color: '#4f7d7a', kind: 'post', params: [['mix','Blend',0,1,.5],['rate','Rate',.1,8,.6,'exp'],['depth','Depth',0,1,.35]] },
+  { id: 'phas', name: 'Phaser', color: '#6a5a8c', kind: 'post', params: [['mix','Blend',0,1,.5],['rate','Rate',.05,8,.5,'exp'],['oct','Octaves',1,6,3]] },
+  { id: 'trem', name: 'Tremolo', color: '#a3402f', kind: 'post', params: [['mix','Blend',0,1,.6],['rate','Rate',.5,20,4.5,'exp'],['depth','Depth',0,1,.45]] },
+  { id: 'pan',  name: 'Sway', sub: 'auto-pan', color: '#2f4a6b', kind: 'post', params: [['mix','Blend',0,1,.8],['rate','Rate',.05,10,.8,'exp'],['depth','Depth',0,1,.4]] },
+  { id: 'dly',  name: 'Canyon', sub: 'echo send', color: '#4a6a8a', kind: 'send', params: [['mix','Send',0,1,.3],['time','Time',.05,1.2,.35],['fb','Feedback',0,.85,.4]] },
+  { id: 'rev',  name: 'Barn', sub: 'reverb send', color: '#5b6b4a', kind: 'send', params: [['mix','Send',0,1,.25]] }
 ];
 const FXMAP = Object.fromEntries(FX.map(f => [f.id, f]));
 const EXTRA_PARAMS = [
@@ -313,102 +378,154 @@ function addParam(id, label, group, min, max, def, curve, apply) {
   p.base = p.cur = toNorm(p, def);
   PARAMS[id] = p; PARAM_ORDER.push(id); return p;
 }
-const ramp = (sig, v, t = .05) => { try { sig.rampTo(v, t); } catch (e) { try { sig.value = v; } catch (e2) {} } };
-
-function xfadeSlot(inN, outN) {
-  const input = new Tone.Gain(1), xf = new Tone.CrossFade(0);
-  input.connect(xf.a); input.connect(inN); outN.connect(xf.b);
-  return { input, output: xf, setMix: v => ramp(xf.fade, v, .05) };
+// cheapest smooth parameter change: native AudioParam.setTargetAtTime (no Tone timeline bookkeeping)
+function nativeParam(s) { let p = s; for (let i = 0; i < 4 && p && p._param; i++) p = p._param; return p && typeof p.setTargetAtTime === 'function' ? p : null; }
+function glide(sig, v, tc = .03) {
+  if (!sig || !isFinite(v)) return;
+  const np = nativeParam(sig);
+  try { if (np) { np.setTargetAtTime(v, Tone.getContext().currentTime, tc); return; } } catch (e) {}
+  try { sig.setTargetAtTime(v, Tone.now(), tc); } catch (e) { try { sig.value = v; } catch (e2) {} }
 }
+const ramp = (sig, v, t = .05) => glide(sig, v, t / 3);
+
+// linear dry/wet insert (no equal-power bump)
+function insertSlot(inN, outN, extra = []) {
+  const input = new Tone.Gain(1), output = new Tone.Gain(1), dry = new Tone.Gain(1), wet = new Tone.Gain(0);
+  input.connect(dry); dry.connect(output); input.connect(inN); outN.connect(wet); wet.connect(output);
+  return { input, output, setMix: v => { glide(dry.gain, 1 - v); glide(wet.gain, v); }, nodes: [input, output, dry, wet, ...extra] };
+}
+const tanhCurve = (k => { const n = 2048, c = new Float32Array(n); for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; c[i] = Math.tanh(k * x) / Math.tanh(k); } return c; })(2.2);
+const FX_BUILD = {
+  warm() {
+    const pre = new Tone.Gain(1), sh = new Tone.WaveShaper(tanhCurve), post = new Tone.Gain(1), hs = new Tone.Filter({ type: 'highshelf', frequency: 9000, gain: -2 });
+    sh.oversample = '2x'; pre.connect(sh); sh.connect(post); post.connect(hs);
+    const s = insertSlot(pre, hs, [pre, sh, post, hs]);
+    s.set = { drive: v => { glide(pre.gain, 1 + v * 3.5); glide(post.gain, 1 / (1 + v * 1.6)); } };
+    return s;
+  },
+  harm() {
+    const input = new Tone.Gain(1), output = new Tone.Gain(1), dry = new Tone.Gain(1), mix = new Tone.Gain(0);
+    const psA = new Tone.PitchShift({ pitch: 7, windowSize: .04 }), psB = new Tone.PitchShift({ pitch: -5, windowSize: .04 });
+    const pA = new Tone.Panner(-.45), pB = new Tone.Panner(.45), gA = new Tone.Gain(.5), gB = new Tone.Gain(.4);
+    const hp = new Tone.Filter(180, 'highpass'), lp = new Tone.Filter(5000, 'lowpass');
+    input.connect(dry); dry.connect(output);
+    input.connect(psA); input.connect(psB); psA.connect(pA); pA.connect(gA); psB.connect(pB); pB.connect(gB);
+    gA.connect(hp); gB.connect(hp); hp.connect(lp); lp.connect(mix); mix.connect(output);
+    return { input, output, nodes: [input, output, dry, mix, psA, psB, pA, pB, gA, gB, hp, lp],
+      setMix: v => { glide(mix.gain, v * .8); glide(dry.gain, 1 - .35 * v); },
+      set: { a: v => psA.pitch = v + (v ? .07 : 0), b: v => psB.pitch = v - (v ? .07 : 0) } };
+  },
+  filt() {
+    // "Amount" sweeps the cutoff from wide-open toward the set cutoff (no comb-filtering dry/wet)
+    const f = new Tone.Filter({ type: 'lowpass', frequency: 6000, Q: .9, rolloff: -12 });
+    let amt = 1, fc = 6000;
+    const upd = () => glide(f.frequency, Math.exp(lerp(Math.log(18000), Math.log(fc), amt)), .04);
+    return { input: f, output: f, nodes: [f], setMix: v => { amt = v; upd(); }, set: { freq: v => { fc = v; upd(); }, q: v => glide(f.Q, v) } };
+  },
+  vib() { const vb = new Tone.Vibrato({ frequency: 5, depth: .15 }); const s = insertSlot(vb, vb, [vb]); s.set = { rate: v => glide(vb.frequency, v), depth: v => glide(vb.depth, v * .6) }; return s; },
+  chor() {
+    const c = new Tone.Chorus({ frequency: .6, delayTime: 8, depth: .35, spread: 180 }).start(); let last = -1;
+    const s = insertSlot(c, c, [c]); s.set = { rate: v => glide(c.frequency, v), depth: v => { if (Math.abs(v - last) > .03) { last = v; c.depth = v; } } }; return s;
+  },
+  phas() {
+    const ph = new Tone.Phaser({ frequency: .5, octaves: 3, baseFrequency: 400, stages: 4 }); let last = -1;
+    const s = insertSlot(ph, ph, [ph]); s.set = { rate: v => glide(ph.frequency, v), oct: v => { if (Math.abs(v - last) > .15) { last = v; ph.octaves = v; } } }; return s;
+  },
+  trem() { const t = new Tone.Tremolo({ frequency: 4.5, depth: .45, spread: 0 }).start(); const s = insertSlot(t, t, [t]); s.set = { rate: v => glide(t.frequency, v), depth: v => glide(t.depth, v) }; return s; },
+  pan() { const p = new Tone.AutoPanner({ frequency: .8, depth: .4 }).start(); const s = insertSlot(p, p, [p]); s.set = { rate: v => glide(p.frequency, v), depth: v => glide(p.depth, v) }; return s; },
+  dly() {
+    // feedback delay with the tone filters INSIDE the loop, so every repeat gets darker
+    const input = new Tone.Gain(0), sum = new Tone.Gain(1), d = new Tone.Delay({ delayTime: .35, maxDelay: 1.5 }), lp = new Tone.Filter(3800, 'lowpass'), hp = new Tone.Filter(300, 'highpass'), fb = new Tone.Gain(.4), output = new Tone.Gain(1);
+    input.connect(sum); sum.connect(d); d.connect(lp); lp.connect(hp); hp.connect(fb); fb.connect(sum); hp.connect(output);
+    return { input, output, nodes: [input, sum, d, lp, hp, fb, output], setMix: v => glide(input.gain, v),
+      set: { time: v => glide(d.delayTime, v, .12), fb: v => glide(fb.gain, Math.min(v, .85)) } };
+  },
+  rev() {
+    const input = new Tone.Gain(0), r = new Tone.Reverb({ decay: 2.4, preDelay: .045 }), hp = new Tone.Filter(250, 'highpass'), lp = new Tone.Filter(7000, 'lowpass');
+    input.connect(r); r.connect(hp); hp.connect(lp);
+    return { input, output: lp, nodes: [input, r, hp, lp], ready: r.ready, setMix: v => glide(input.gain, v * 1.2), set: {} };
+  }
+};
+A.slots = {};
+function ensureSlot(id) {
+  if (A.slots[id]) return A.slots[id];
+  const s = FX_BUILD[id](); A.slots[id] = s;
+  if (FXMAP[id].kind === 'send') s.output.connect(A.fxOut);
+  for (const [k] of FXMAP[id].params) forceApply(`fx.${id}.${k}`);
+  return s;
+}
+let rewireT = 0;
+function rewire() {
+  // only effects that are switched on are in the signal path (the browser skips everything else)
+  try { A.vocalBus.disconnect(); A.merge.disconnect(); A.preSend.disconnect(); } catch (e) {}
+  for (const f of FX) { const s = A.slots[f.id]; if (s && f.kind !== 'send') try { s.output.disconnect(); } catch (e) {} }
+  let p = A.vocalBus;
+  for (const f of FX) if (f.kind === 'pre' && S.fxOn[f.id]) { const s = ensureSlot(f.id); p.connect(s.input); p = s.output; }
+  p.connect(A.merge);
+  p = A.merge;
+  for (const f of FX) if (f.kind === 'post' && S.fxOn[f.id]) { const s = ensureSlot(f.id); p.connect(s.input); p = s.output; }
+  p.connect(A.preSend);
+  A.preSend.connect(A.fxOut);
+  for (const f of FX) if (f.kind === 'send' && S.fxOn[f.id]) A.preSend.connect(ensureSlot(f.id).input);
+  for (const f of FX) forceApply(`fx.${f.id}.mix`);
+  if (A.scopeIn) A.vocalBus.connect(A.scopeIn);
+}
+function setFx(id, on) {
+  if (!!S.fxOn[id] === !!on) return;
+  S.fxOn[id] = !!on;
+  // short dip around the re-patch so switching never clicks
+  glide(A.fxOut.gain, 0, .006);
+  clearTimeout(rewireT); rewireT = setTimeout(() => { rewire(); glide(A.fxOut.gain, 1, .01); }, 30);
+}
+function setAllFx(on) { for (const f of FX) S.fxOn[f.id] = !!on[f.id]; glide(A.fxOut.gain, 0, .006); clearTimeout(rewireT); rewireT = setTimeout(() => { rewire(); glide(A.fxOut.gain, 1, .01); }, 30); }
+// free effects that stay switched off for a while
+setInterval(() => {
+  if (!A.slots) return; const now = performance.now();
+  for (const f of FX) { const s = A.slots[f.id]; if (!s || f.id === 'rev') continue; if (S.fxOn[f.id]) { s.offSince = 0; continue; } s.offSince = s.offSince || now; if (now - s.offSince > 20000) { try { s.output.disconnect(); } catch (e) {} s.nodes.forEach(n => { try { n.dispose(); } catch (e) {} }); delete A.slots[f.id]; } }
+}, 5000);
 
 async function buildAudio() {
-  const ctx = Tone.getContext();
-  try { ctx.lookAhead = 0; } catch (e) {}
   A.micGain = new Tone.Gain(0);
+  A.hpf = new Tone.Filter({ type: 'highpass', frequency: 90, rolloff: -24 });
+  A.comp = new Tone.Compressor({ threshold: -20, ratio: 3, attack: .008, release: .12, knee: 6 });
+  A.deess = new Tone.Filter({ type: 'peaking', frequency: 6500, Q: 2, gain: -3 });
+  A.vocalBus = new Tone.Gain(.8);
+  A.micGain.chain(A.hpf, A.comp, A.deess, A.vocalBus);
+  A.backingGain = new Tone.Gain(.7); A.backingGain.connect(A.vocalBus);
+  A.demoGain = new Tone.Gain(0); A.demoGain.connect(A.vocalBus);
   A.voiceGain = new Tone.Gain(.7);
-  A.backingGain = new Tone.Gain(.7);
-  A.src = new Tone.Gain(1);
-  A.micGain.connect(A.src); A.voiceGain.connect(A.src); A.backingGain.connect(A.src);
-  const slots = {};
-  // Harmonizer: dry + pitched voices added in
-  {
-    const input = new Tone.Gain(1), out = new Tone.Gain(1), mix = new Tone.Gain(0);
-    const psA = new Tone.PitchShift({ pitch: 4, windowSize: .08 }), psB = new Tone.PitchShift({ pitch: 7, windowSize: .08 });
-    const gA = new Tone.Gain(.75), gB = new Tone.Gain(.6);
-    input.connect(out); input.connect(psA); input.connect(psB); psA.connect(gA); psB.connect(gB); gA.connect(mix); gB.connect(mix); mix.connect(out);
-    slots.harm = { input, output: out, setMix: v => ramp(mix.gain, v * 1.1), set: { a: v => psA.pitch = v, b: v => psB.pitch = v } };
-  }
-  {
-    const d = new Tone.Distortion({ distortion: .25, oversample: '2x' }), lp = new Tone.Filter(5200, 'lowpass'), sh = new Tone.Filter({ type: 'lowshelf', frequency: 220, gain: 3 });
-    d.connect(lp); lp.connect(sh);
-    slots.warm = Object.assign(xfadeSlot(d, sh), { set: { drive: v => d.distortion = v * .9 } });
-  }
-  {
-    const f = new Tone.Filter({ type: 'lowpass', frequency: 6000, Q: 1, rolloff: -24 });
-    slots.filt = Object.assign(xfadeSlot(f, f), { set: { freq: v => ramp(f.frequency, v), q: v => ramp(f.Q, v) } });
-  }
-  {
-    const vb = new Tone.Vibrato({ frequency: 5, depth: .15 });
-    slots.vib = Object.assign(xfadeSlot(vb, vb), { set: { rate: v => ramp(vb.frequency, v), depth: v => ramp(vb.depth, v * .6) } });
-  }
-  {
-    const c = new Tone.Chorus({ frequency: 1.5, delayTime: 3.5, depth: .6, spread: 180 }).start();
-    slots.chor = Object.assign(xfadeSlot(c, c), { set: { rate: v => ramp(c.frequency, v), depth: v => c.depth = v } });
-  }
-  {
-    const ph = new Tone.Phaser({ frequency: .5, octaves: 3, baseFrequency: 400 });
-    slots.phas = Object.assign(xfadeSlot(ph, ph), { set: { rate: v => ramp(ph.frequency, v), oct: v => ph.octaves = v } });
-  }
-  {
-    const t = new Tone.Tremolo({ frequency: 6, depth: .85, spread: 0 }).start();
-    slots.trem = Object.assign(xfadeSlot(t, t), { set: { rate: v => ramp(t.frequency, v), depth: v => ramp(t.depth, v) } });
-  }
-  {
-    const p = new Tone.AutoPanner({ frequency: .8, depth: 1 }).start();
-    slots.pan = Object.assign(xfadeSlot(p, p), { set: { rate: v => ramp(p.frequency, v), depth: v => ramp(p.depth, v) } });
-  }
-  {
-    const d = new Tone.FeedbackDelay({ delayTime: .35, feedback: .4, maxDelay: 1.5 });
-    const tone = new Tone.Filter(3800, 'lowpass'); d.connect(tone);
-    slots.dly = Object.assign(xfadeSlot(d, tone), { set: { time: v => ramp(d.delayTime, v, .12), fb: v => ramp(d.feedback, v) } });
-  }
-  {
-    const r = new Tone.Reverb({ decay: 4.2, preDelay: .03 });
-    try { await r.ready; } catch (e) {}
-    slots.rev = Object.assign(xfadeSlot(r, r), { set: {} });
-  }
-  A.slots = slots;
-  // chain
-  let prev = A.src;
-  for (const f of FX) { prev.connect(slots[f.id].input); prev = slots[f.id].output; }
-  A.fxOut = new Tone.Gain(1); prev.connect(A.fxOut);
+  A.merge = new Tone.Gain(1); A.voiceGain.connect(A.merge);
+  A.preSend = new Tone.Gain(1);
+  A.fxOut = new Tone.Gain(1);
   A.live = new Tone.Gain(1); A.fxOut.connect(A.live);
   A.loops = new Tone.Gain(.85);
   A.master = new Tone.Gain(.85);
   A.live.connect(A.master); A.loops.connect(A.master);
-  A.limiter = new Tone.Limiter(-1);
+  A.limiter = new Tone.Compressor({ threshold: -3, ratio: 20, knee: 0, attack: .002, release: .15 });
   A.master.connect(A.limiter); A.limiter.toDestination();
-  A.meter = new Tone.Meter({ smoothing: .85 }); A.master.connect(A.meter);
+  A.meter = new Tone.Meter({ smoothing: .6 }); A.limiter.connect(A.meter);
+  A.inMeter = new Tone.Meter({ smoothing: .6 }); A.vocalBus.connect(A.inMeter);
   A.loopRec = new Tone.Recorder(); A.fxOut.connect(A.loopRec);
-  A.takeRec = new Tone.Recorder(); A.master.connect(A.takeRec);
+  A.takeRec = new Tone.Recorder(); A.limiter.connect(A.takeRec);
+  // build the reverb up front (impulse generation takes a moment) so switching it on is instant
+  ensureSlot('rev'); try { await A.slots.rev.ready; } catch (e) {}
 
-  // params
   for (const f of FX) for (const [k, label, mn, mx, def, curve] of f.params) {
-    const slot = slots[f.id];
     addParam(`fx.${f.id}.${k}`, (k === 'mix' ? f.name : f.name + ' ' + label.toLowerCase()), f.name, mn, mx, def, curve,
-      k === 'mix' ? (v => slot.setMix(S.fxOn[f.id] ? v : 0)) : (v => slot.set[k](v)));
+      v => { const s = A.slots[f.id]; if (!s) return; if (k === 'mix') s.setMix(v); else s.set[k] && s.set[k](v); });
   }
   const ap = {
-    'master.vol': v => ramp(A.master.gain, v), 'mic.gain': v => ramp(A.micGain.gain, S.micOn ? v : 0),
-    'voice.vol': v => ramp(A.voiceGain.gain, v), 'loops.vol': v => ramp(A.loops.gain, v), 'backing.vol': v => ramp(A.backingGain.gain, v)
+    'master.vol': v => glide(A.master.gain, v), 'mic.gain': v => glide(A.micGain.gain, S.micOn ? v : 0),
+    'voice.vol': v => glide(A.voiceGain.gain, v), 'loops.vol': v => glide(A.loops.gain, v), 'backing.vol': v => glide(A.backingGain.gain, v)
   };
   for (const [id, label, group, mn, mx, def, curve] of EXTRA_PARAMS) addParam(id, label, group, mn, mx, def, curve, ap[id] || (() => {}));
+  rewire();
 }
 function forceApply(id) { const p = PARAMS[id]; if (p) { p.applied = -1; } }
 
 /* ---------------- mic ---------------- */
 async function startMic() {
-  if (S.sandbox) { toast('No mic in preview mode. Load a vocal stem in the Library instead.'); return false; }
+  if (S.sandbox) { toast('No mic in preview mode. Turn on the demo singer, or load a vocal stem in the Library.'); return false; }
   try {
     const st = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: S.settings.speakerMode, noiseSuppression: S.settings.speakerMode, autoGainControl: false, deviceId: S.settings.micId ? { exact: S.settings.micId } : undefined, latency: 0 } });
     A.micStream = st;
@@ -425,28 +542,67 @@ function stopMic() {
 }
 async function toggleMic() { if (S.micOn) stopMic(); else await startMic(); }
 
+/* ---------------- demo singer: a formant "voice" so you can hear the rack without a mic ---------------- */
+const DEMO = { on: false, nodes: null, loop: null, step: 0 };
+const VOWELS = { a: [800, 1150, 2900], o: [450, 800, 2830], e: [400, 1700, 2600], u: [325, 700, 2700], i: [300, 2200, 2950] };
+const TUNE = [[4,'a',2],[4,'o',1],[5,'a',1],[4,'e',2],[2,'o',2],[1,'a',2],[2,'u',1],[4,'o',1],[0,'a',4],[null,'',1],[2,'e',2],[4,'a',2],[5,'o',1],[7,'a',1],[5,'e',2],[4,'o',4],[null,'',1]];
+function demoBuild() {
+  const src = new Tone.FatOscillator({ type: 'sawtooth', count: 2, spread: 10, frequency: 220 });
+  const vib = new Tone.LFO({ frequency: 5.3, min: -22, max: 22 }); vib.connect(src.detune); vib.start();
+  const amp = new Tone.Gain(0), sum = new Tone.Gain(1), breath = new Tone.Noise('pink'), bg = new Tone.Gain(.012);
+  const fs = [0, 1, 2].map(i => new Tone.Filter({ type: 'bandpass', frequency: VOWELS.a[i], Q: [7, 9, 10][i] }));
+  const fg = [1, .55, .3].map(g => new Tone.Gain(g * 2.4));
+  fs.forEach((f, i) => { src.connect(f); f.connect(fg[i]); fg[i].connect(sum); });
+  breath.connect(bg); bg.connect(fs[1]); breath.start();
+  sum.connect(amp); amp.connect(A.demoGain); src.start();
+  DEMO.nodes = { src, vib, amp, sum, fs, fg, breath, bg };
+}
+function demoTick() {
+  if (!DEMO.on || !DEMO.nodes) return;
+  const n = DEMO.nodes, [deg, vow, beats] = TUNE[DEMO.step % TUNE.length]; DEMO.step++;
+  const beat = 60 / 84, now = Tone.now() + .02;
+  if (deg == null) { n.amp.gain.setTargetAtTime(0, now, .08); }
+  else {
+    const sc = SCALES[S.settings.scale] || SCALES.Major, len = sc.length;
+    const midi = S.settings.key + 60 + 12 * Math.floor(deg / len) + sc[((deg % len) + len) % len];
+    n.src.frequency.setTargetAtTime(mtof(midi), now, .035);
+    VOWELS[vow].forEach((f, i) => n.fs[i].frequency.setTargetAtTime(f, now, .06));
+    n.amp.gain.setTargetAtTime(.35, now, .05);
+    n.amp.gain.setTargetAtTime(.22, now + beat * beats * .6, .2);
+  }
+  DEMO.timer = setTimeout(demoTick, beat * beats * 1000);
+}
+function demoSet(on) {
+  DEMO.on = on;
+  if (on) { if (!DEMO.nodes) demoBuild(); glide(A.demoGain.gain, 1, .05); clearTimeout(DEMO.timer); DEMO.step = 0; demoTick(); }
+  else { clearTimeout(DEMO.timer); glide(A.demoGain.gain, 0, .1); if (DEMO.nodes) DEMO.nodes.amp.gain.setTargetAtTime(0, Tone.now(), .1); }
+  updateTopbar();
+}
+
 /* =====================================================================
-   VOICES (instruments the hands play)
+   VOICES (instruments the hands play) — join the chain after the harmonizer
    ===================================================================== */
 const VOICES = {
   none: { name: '— none (just your voice) —' },
-  dulcimer: { name: 'Hammered dulcimer', kind: 'trigger', make: () => new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'fattriangle', count: 2, spread: 12 }, envelope: { attack: .002, decay: 1.6, sustain: 0, release: 1.6 }, volume: -10 }) },
-  kalimba: { name: 'Kalimba', kind: 'trigger', make: () => new Tone.PolySynth(Tone.FMSynth, { harmonicity: 8, modulationIndex: 2.2, oscillator: { type: 'sine' }, envelope: { attack: .001, decay: 1.1, sustain: 0, release: 1 }, modulation: { type: 'sine' }, modulationEnvelope: { attack: .001, decay: .15, sustain: 0, release: .1 }, volume: -6 }) },
-  bell: { name: 'Chapel bell', kind: 'trigger', make: () => new Tone.PolySynth(Tone.FMSynth, { harmonicity: 3.01, modulationIndex: 12, envelope: { attack: .001, decay: 3, sustain: 0, release: 3 }, modulationEnvelope: { attack: .002, decay: 1.2, sustain: 0, release: 1 }, volume: -14 }) },
-  harp: { name: 'Lap harp', kind: 'trigger', make: () => new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'sine' }, envelope: { attack: .004, decay: 2.2, sustain: 0, release: 2 }, volume: -6 }) },
-  organ: { name: 'Pump organ (chords)', kind: 'chord', make: () => new Tone.PolySynth(Tone.AMSynth, { harmonicity: 2, oscillator: { type: 'square' }, modulation: { type: 'sine' }, envelope: { attack: .09, decay: .2, sustain: .85, release: .7 }, volume: -18 }) },
-  fiddle: { name: 'Fiddle drone (chords)', kind: 'chord', make: () => new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'fatsawtooth', count: 3, spread: 18 }, envelope: { attack: .25, decay: .3, sustain: .8, release: 1 }, volume: -22 }) },
+  dulcimer: { name: 'Hammered dulcimer', kind: 'trigger', rel: 1.6, make: () => new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'fattriangle', count: 2, spread: 12 }, envelope: { attack: .002, decay: 1.6, sustain: 0, release: 1.6 }, volume: -10 }) },
+  kalimba: { name: 'Kalimba', kind: 'trigger', rel: 1.1, make: () => new Tone.PolySynth(Tone.FMSynth, { harmonicity: 8, modulationIndex: 2.2, oscillator: { type: 'sine' }, envelope: { attack: .001, decay: 1.1, sustain: 0, release: 1 }, modulation: { type: 'sine' }, modulationEnvelope: { attack: .001, decay: .15, sustain: 0, release: .1 }, volume: -12 }) },
+  bell: { name: 'Chapel bell', kind: 'trigger', rel: 3, post: () => new Tone.Filter(5000, 'lowpass'), make: () => new Tone.PolySynth(Tone.FMSynth, { harmonicity: 3.01, modulationIndex: 6, envelope: { attack: .001, decay: 3, sustain: 0, release: 3 }, modulationEnvelope: { attack: .002, decay: 1.2, sustain: 0, release: 1 }, volume: -17 }) },
+  harp: { name: 'Lap harp', kind: 'trigger', rel: 2.2, make: () => new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'sine' }, envelope: { attack: .004, decay: 2.2, sustain: 0, release: 2 }, volume: -11 }) },
+  organ: { name: 'Pump organ (chords)', kind: 'chord', rel: .7, spread: true, post: () => new Tone.Filter(2500, 'lowpass'), make: () => new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'custom', partials: [1, .5, .25, .12] }, envelope: { attack: .09, decay: .2, sustain: .85, release: .7 }, volume: -20 }) },
+  fiddle: { name: 'Fiddle drone (chords)', kind: 'chord', rel: 1, post: () => new Tone.Filter(2800, 'lowpass'), make: () => new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'fatsawtooth', count: 2, spread: 18 }, envelope: { attack: .25, decay: .3, sustain: .8, release: 1 }, volume: -22 }) },
   theremin: { name: 'Firefly theremin', kind: 'cont' },
   drone: { name: 'Hurdy-gurdy drone', kind: 'drone' },
-  sample: { name: 'Your sample (from Library)', kind: 'trigger', desktopOnly: true }
+  sample: { name: 'Your sample (from Library)', kind: 'trigger', rel: .8, desktopOnly: true }
 };
-const V = { synth: null, cont: null, lastDeg: null, held: [], gateOpen: true };
+const V = { synth: null, post: null, cont: null, lastDeg: null, held: [] };
 function voiceDefaults(v) { return Object.assign({ id: 'none', hand: 'R', axis: 'y', oct: 4, range: 2, strum: true, snap: false }, v || {}); }
 function disposeVoice() {
+  const def = VOICES[S.voice && S.voice.id] || {};
   try { V.synth && V.synth.releaseAll && V.synth.releaseAll(); } catch (e) {}
-  const s = V.synth, c = V.cont; V.synth = null; V.cont = null; V.held = [];
-  setTimeout(() => { try { s && s.dispose(); } catch (e) {} try { c && c.nodes.forEach(n => n.dispose()); } catch (e) {} }, 1500);
-  if (c) ramp(c.amp.gain, 0, .2);
+  const s = V.synth, p = V.post, c = V.cont; V.synth = null; V.post = null; V.cont = null; V.held = [];
+  const wait = ((def.rel || 1.5) * 1000) + 300;
+  setTimeout(() => { try { s && s.dispose(); } catch (e) {} try { p && p.dispose(); } catch (e) {} try { c && c.nodes.forEach(n => n.dispose()); } catch (e) {} }, wait);
+  if (c) glide(c.amp.gain, 0, .08);
 }
 function setVoice(cfg) {
   disposeVoice();
@@ -458,28 +614,36 @@ function setVoice(cfg) {
       const item = LIB.items.find(i => i.id === S.voice.sampleId);
       if (!item || !item.buffer) { toast('Pick a sample in the Library first'); S.voice.id = 'none'; return; }
       V.synth = new Tone.Sampler({ urls: { C4: new Tone.ToneAudioBuffer(item.buffer) }, release: .8 });
-    } else V.synth = def.make();
-    try { V.synth.maxPolyphony = 12; } catch (e) {}
-    V.synth.connect(A.voiceGain);
+    } else { V.synth = def.make(); try { V.synth.maxPolyphony = 6; } catch (e) {} }
+    if (def.post) { V.post = def.post(); V.synth.connect(V.post); V.post.connect(A.voiceGain); } else V.synth.connect(A.voiceGain);
   } else if (def.kind === 'cont') {
-    const o1 = new Tone.Oscillator({ type: 'sine', frequency: 440 }).start(), o2 = new Tone.Oscillator({ type: 'triangle', frequency: 440 }).start();
+    const o1 = new Tone.Oscillator({ type: 'sine', frequency: 440 }), o2 = new Tone.Oscillator({ type: 'triangle', frequency: 440 });
     const g2 = new Tone.Gain(.25), amp = new Tone.Gain(0), lp = new Tone.Filter(2600, 'lowpass');
     o1.connect(amp); o2.connect(g2); g2.connect(amp); amp.connect(lp); lp.connect(A.voiceGain);
-    V.cont = { kind: 'cont', oscs: [o1, o2], amp, nodes: [o1, o2, g2, amp, lp], f: 440 };
+    V.cont = { kind: 'cont', oscs: [o1, o2], amp, nodes: [o1, o2, g2, amp, lp], f: 440, running: false, quietSince: 0 };
   } else if (def.kind === 'drone') {
-    const mk = (det) => new Tone.FatOscillator({ type: 'sawtooth', count: 3, spread: 22, frequency: 110 }).start();
-    const o1 = mk(), o2 = mk(), o3 = new Tone.Oscillator({ type: 'triangle', frequency: 55 }).start();
-    const lp = new Tone.Filter({ frequency: 1100, type: 'lowpass', Q: 2 }), amp = new Tone.Gain(0), g = new Tone.Gain(.18), g3 = new Tone.Gain(.5);
-    o1.connect(g); o2.connect(g); o3.connect(g3); g3.connect(g); g.connect(lp); lp.connect(amp); amp.connect(A.voiceGain);
-    V.cont = { kind: 'drone', oscs: [o1, o2, o3], amp, nodes: [o1, o2, o3, lp, amp, g, g3], f: 110 };
+    const o1 = new Tone.FatOscillator({ type: 'sawtooth', count: 2, spread: 22, frequency: 110 }), o2 = new Tone.FatOscillator({ type: 'sawtooth', count: 2, spread: 22, frequency: 165 }), o3 = new Tone.Oscillator({ type: 'triangle', frequency: 110 });
+    const lp = new Tone.Filter({ frequency: 1100, type: 'lowpass', Q: .7 }), hp = new Tone.Filter(60, 'highpass'), amp = new Tone.Gain(0), g = new Tone.Gain(.18), g3 = new Tone.Gain(.5);
+    o1.connect(g); o2.connect(g); o3.connect(g3); g3.connect(g); g.connect(lp); lp.connect(hp); hp.connect(amp); amp.connect(A.voiceGain);
+    V.cont = { kind: 'drone', oscs: [o1, o2, o3], amp, nodes: [o1, o2, o3, lp, hp, amp, g, g3], f: 110, running: false, quietSince: 0 };
   }
+}
+// oscillators only run while a hand is actually playing them
+function contRun(on) {
+  const c = V.cont; if (!c || c.running === on) return;
+  c.running = on;
+  try { c.oscs.forEach(o => on ? o.start() : o.stop()); } catch (e) {}
 }
 function scaleMidi(deg) {
   const sc = SCALES[S.settings.scale] || SCALES.Major, n = sc.length;
   const oct = Math.floor(deg / n), i = ((deg % n) + n) % n;
   return S.settings.key + 12 * (S.voice.oct + 1) + 12 * oct + sc[i];
 }
-function triad(deg) { return [scaleMidi(deg), scaleMidi(deg + 2), scaleMidi(deg + 4)]; }
+function triad(deg) {
+  const r = scaleMidi(deg), t = scaleMidi(deg + 2), f = scaleMidi(deg + 4);
+  return (VOICES[S.voice.id] || {}).spread ? [r - 12, f, t + 12] : [r, t, f];
+}
+function voiceGateBlocked(hd) { const act = ((S.poses || {})[hd.id] || {})[hd.cand]; return act && act !== 'none'; }
 function updateVoice(dt) {
   const def = VOICES[S.voice.id]; if (!def || S.voice.id === 'none') return;
   const hd = S.hands[S.voice.hand]; const present = hd.present;
@@ -488,28 +652,32 @@ function updateVoice(dt) {
   if (def.kind === 'trigger' || def.kind === 'chord') {
     const nDeg = Math.max(1, Math.round(sc.length * S.voice.range));
     const deg = Math.min(nDeg - 1, Math.floor(axisV * nDeg));
-    const closedNow = present && (hd.pinchRaw < .26);
+    const closedNow = present && hd.pinchRaw < .26 && !voiceGateBlocked(hd);
     const openNow = !present || hd.pinchRaw > .40;
     if (!hd.gate && closedNow) { hd.gate = true; playDeg(deg, hd, def.kind); }
     else if (hd.gate && openNow) { hd.gate = false; if (def.kind === 'chord') releaseHeld(); V.lastDeg = null; }
     else if (hd.gate && deg !== V.lastDeg && (S.voice.strum || def.kind === 'chord')) { if (def.kind === 'chord') releaseHeld(); playDeg(deg, hd, def.kind); }
   } else if (V.cont) {
+    const c = V.cont;
+    if (present) { contRun(true); c.quietSince = 0; }
+    else { c.quietSince = c.quietSince || performance.now(); if (performance.now() - c.quietSince > 2500) contRun(false); }
     if (def.kind === 'cont') {
       let m = S.settings.key + 12 * (S.voice.oct) + axisV * 12 * S.voice.range;
       if (S.voice.snap) { const base = Math.floor(m); let best = base, bd = 99; for (let k = base - 2; k <= base + 2; k++) { const pc = (((k - S.settings.key) % 12) + 12) % 12; if (sc.includes(pc) && Math.abs(k - m) < bd) { bd = Math.abs(k - m); best = k; } } m = lerp(m, best, .85); }
-      const f = mtof(m); V.cont.f = f;
-      if (present) V.cont.oscs.forEach((o, i) => ramp(o.frequency, f * (i ? 1.002 : 1), .04));
+      const f = mtof(m);
+      if (present && Math.abs(f - c.f) > .2) { c.f = f; c.oscs.forEach((o, i) => glide(o.frequency, f * (i ? 1.002 : 1), .012)); }
       const amp = present ? Math.pow(clamp(hd.f.open), 1.4) * .8 : 0;
-      ramp(V.cont.amp.gain, amp, present ? .06 : .25);
-      V.cont.note = present ? noteName(Math.round(m)) : '';
+      if (Math.abs(amp - (c.lastAmp || 0)) > .01) { c.lastAmp = amp; glide(c.amp.gain, amp, present ? .02 : .08); }
+      c.note = present ? noteName(Math.round(m)) : '';
     } else {
       const degs = [0, 3, 4, 5, 1];
       const di = Math.min(degs.length - 1, Math.floor(axisV * degs.length));
-      const root = scaleMidi(degs[di] - (S.voice.oct >= 3 ? 7 : 0)) - 12;
+      const root = scaleMidi(degs[di] - (S.voice.oct >= 3 ? 7 : 0));
       const f = mtof(root);
-      if (Math.abs(f - V.cont.f) > .5) { V.cont.f = f; ramp(V.cont.oscs[0].frequency, f, .35); ramp(V.cont.oscs[1].frequency, f * 1.4983, .35); ramp(V.cont.oscs[2].frequency, f / 2, .35); }
-      ramp(V.cont.amp.gain, present ? .25 + .6 * clamp(hd.f.open) : 0, present ? .25 : .9);
-      V.cont.note = present ? noteName(root) : '';
+      if (Math.abs(f - c.f) > .5) { c.f = f; glide(c.oscs[0].frequency, f, .12); glide(c.oscs[1].frequency, f * 1.4983, .12); glide(c.oscs[2].frequency, f, .12); }
+      const amp = present ? .25 + .6 * clamp(hd.f.open) : 0;
+      if (Math.abs(amp - (c.lastAmp || 0)) > .01) { c.lastAmp = amp; glide(c.amp.gain, amp, present ? .08 : .3); }
+      c.note = present ? noteName(root) : '';
     }
   }
 }
@@ -561,12 +729,15 @@ function addLayer(buf) {
       for (let i = 0; i < M; i++) dst[(off + i) % N] += src[i];
     }
   }
-  const g = new Tone.Gain(1).connect(A.loops);
+  // short fades at the seam so loops never click
+  const fadeN = Math.round(.008 * out.sampleRate);
+  for (let ch = 0; ch < out.numberOfChannels; ch++) { const dd = out.getChannelData(ch), N = dd.length; for (let i = 0; i < fadeN && i < N; i++) { const gn = i / fadeN; dd[i] *= gn; dd[N - 1 - i] *= gn; } }
+  const g = new Tone.Gain(.75).connect(A.loops);
   const pl = new Tone.Player(new Tone.ToneAudioBuffer(out)); pl.loop = true; pl.fadeIn = .005; pl.fadeOut = .005; pl.connect(g);
   const offset = L.layers.length ? (((now - L.T0) % len) + len) % len : 0;
   pl.start(now, offset);
   const i = L.layers.length;
-  L.layers.push({ player: pl, gain: g, muted: false, vol: 1, len, color: LOOP_COLORS[i % 8], name: 'Layer ' + (i + 1) });
+  L.layers.push({ player: pl, gain: g, muted: false, vol: .75, len, color: LOOP_COLORS[i % 8], name: 'Layer ' + (i + 1) });
   stamp('layer ' + (i + 1) + ' woven', LOOP_COLORS[i % 8]);
 }
 function loopUndo() {
@@ -642,7 +813,7 @@ function backingPlay(id) {
 }
 function backingStop() { if (LIB.backing) { const p = LIB.backing.player; p.stop(); setTimeout(() => p.dispose(), 200); LIB.backing = null; renderPanelSoon(); } }
 let previewP = null;
-function libPreview(id) { try { previewP && previewP.dispose(); } catch (e) {} const it = LIB.items.find(x => x.id === id); if (!it) return; previewP = new Tone.Player(new Tone.ToneAudioBuffer(it.buffer)).connect(A.master); previewP.start(); setTimeout(() => { try { previewP.stop(); } catch (e) {} }, 4000); }
+function libPreview(id) { try { previewP && previewP.dispose(); } catch (e) {} const it = LIB.items.find(x => x.id === id); if (!it) return; previewP = new Tone.Player(new Tone.ToneAudioBuffer(it.buffer)).connect(A.master); previewP.start(); const pp = previewP; setTimeout(() => { try { pp.stop(); pp.dispose(); } catch (e) {} }, 4000); }
 
 /* =====================================================================
    MIDI OUT
@@ -662,67 +833,67 @@ function midiNotes(ns, on, vel = .8) { if (!MIDI.out) return; for (const n of ns
    ===================================================================== */
 const PRESETS = [
   { name: 'Save Me', blurb: 'Left thumb-index spread brings in the harmonies. Right OK-pinch shakes the tremolo. Hand height sets its speed. Built from the reel.',
-    fx: ['harm','trem','rev','filt'], params: { 'fx.harm.a': 4, 'fx.harm.b': 7, 'fx.harm.mix': 0, 'fx.trem.mix': 0, 'fx.trem.rate': 7, 'fx.trem.depth': .9, 'fx.rev.mix': .2 },
-    routes: [ { hand: 'L', src: 'pinch', target: 'fx.harm.mix', min: 0, max: 1, curve: 's', smooth: .45 },
-              { hand: 'R', src: 'pinch', target: 'fx.trem.mix', min: 0, max: 1, invert: true, smooth: .35 },
-              { hand: 'R', src: 'y', target: 'fx.trem.rate', min: .15, max: .85, smooth: .6 } ] },
+    fx: ['harm','trem','rev','filt'], params: { 'fx.harm.a': 7, 'fx.harm.b': -5, 'fx.harm.mix': 0, 'fx.trem.mix': 0, 'fx.trem.rate': 7, 'fx.trem.depth': .9, 'fx.rev.mix': .2, 'fx.trem.mix': 0 },
+    routes: [ { hand: 'L', src: 'pinch', target: 'fx.harm.mix', min: 0, max: 1, curve: 's', smooth: .27 },
+              { hand: 'R', src: 'pinch', target: 'fx.trem.mix', min: 0, max: 1, invert: true, smooth: .21 },
+              { hand: 'R', src: 'y', target: 'fx.trem.rate', min: .15, max: .85, smooth: .36 } ] },
   { name: 'Choir Loft', blurb: 'Open your right hand to fill the loft with voices. Raise your left for more room. Tilting your left hand makes the chorus shimmer.',
-    fx: ['harm','chor','rev','filt'], params: { 'fx.harm.a': 4, 'fx.harm.b': -5, 'fx.harm.mix': .2, 'fx.rev.mix': .45, 'fx.chor.mix': .35 },
-    routes: [ { hand: 'R', src: 'open', target: 'fx.harm.mix', min: .05, max: 1, curve: 's', smooth: .5 },
-              { hand: 'L', src: 'y', target: 'fx.rev.mix', min: .15, max: .9, smooth: .6 },
-              { hand: 'L', src: 'roll', target: 'fx.chor.depth', min: .1, max: 1, smooth: .5 } ] },
+    fx: ['harm','chor','rev','filt'], params: { 'fx.harm.a': 12, 'fx.harm.b': 7, 'fx.harm.mix': .2, 'fx.rev.mix': .45, 'fx.chor.mix': .35 },
+    routes: [ { hand: 'R', src: 'open', target: 'fx.harm.mix', min: .05, max: 1, curve: 's', smooth: .30 },
+              { hand: 'L', src: 'y', target: 'fx.rev.mix', min: .15, max: .9, smooth: .36 },
+              { hand: 'L', src: 'roll', target: 'fx.chor.depth', min: .1, max: 1, smooth: .30 } ] },
   { name: 'Porch Swing', blurb: 'Warm and swaying. Left height sets how fast the voice swings across. Right pinch deepens the tremolo, and right side-to-side adds grit.',
     fx: ['warm','filt','trem','pan','rev'], params: { 'fx.trem.mix': .55, 'fx.trem.rate': 4.5, 'fx.pan.mix': .8, 'fx.warm.mix': .55, 'fx.warm.drive': .25, 'fx.filt.freq': 5000, 'fx.rev.mix': .2 },
-    routes: [ { hand: 'L', src: 'y', target: 'fx.pan.rate', min: .1, max: .7, smooth: .6 },
-              { hand: 'R', src: 'pinch', target: 'fx.trem.depth', min: .1, max: 1, invert: true, smooth: .4 },
-              { hand: 'R', src: 'x', target: 'fx.warm.drive', min: .05, max: .8, smooth: .5 },
-              { hand: 'L', src: 'pinch', target: 'fx.filt.freq', min: .35, max: 1, smooth: .5 } ],
+    routes: [ { hand: 'L', src: 'y', target: 'fx.pan.rate', min: .1, max: .7, smooth: .36 },
+              { hand: 'R', src: 'pinch', target: 'fx.trem.depth', min: .1, max: 1, invert: true, smooth: .24 },
+              { hand: 'R', src: 'x', target: 'fx.warm.drive', min: .05, max: .8, smooth: .30 },
+              { hand: 'L', src: 'pinch', target: 'fx.filt.freq', min: .35, max: 1, smooth: .30 } ],
     lfos: [ { on: true, shape: 'sine', rate: .08, depth: .15, target: 'fx.filt.freq' } ] },
   { name: 'Canyon Echo', blurb: 'Raise your left hand to keep the echoes coming back, and pinch to throw more voice into them. Right side-to-side stretches the canyon (it stays where you leave it).',
     fx: ['dly','rev','filt'], params: { 'fx.dly.mix': .35, 'fx.dly.time': .38, 'fx.dly.fb': .45, 'fx.rev.mix': .3 },
-    routes: [ { hand: 'L', src: 'y', target: 'fx.dly.fb', min: 0, max: .97, smooth: .5 },
-              { hand: 'L', src: 'pinch', target: 'fx.dly.mix', min: .05, max: .9, smooth: .4 },
-              { hand: 'R', src: 'x', target: 'fx.dly.time', min: .08, max: 1, smooth: .7, onLost: 'hold' },
-              { hand: 'R', src: 'y', target: 'fx.filt.freq', min: .25, max: 1, smooth: .5 } ] },
+    routes: [ { hand: 'L', src: 'y', target: 'fx.dly.fb', min: 0, max: .97, smooth: .30 },
+              { hand: 'L', src: 'pinch', target: 'fx.dly.mix', min: .05, max: .9, smooth: .24 },
+              { hand: 'R', src: 'x', target: 'fx.dly.time', min: .08, max: 1, smooth: .42, onLost: 'hold' },
+              { hand: 'R', src: 'y', target: 'fx.filt.freq', min: .25, max: 1, smooth: .30 } ] },
   { name: 'Hurdy-Gurdy', blurb: 'A droning wheel under your voice. Right hand height picks the chord (I, IV, V, vi) and opening it swells the drone. Left pinch opens the filter, and left height stacks the octave.',
     fx: ['harm','warm','filt','vib','rev'], params: { 'fx.harm.a': 12, 'fx.harm.b': 7, 'fx.harm.mix': 0, 'fx.warm.drive': .35, 'fx.filt.freq': 1800, 'fx.vib.mix': 1, 'fx.vib.depth': .08, 'fx.rev.mix': .3 },
     voice: { id: 'drone', hand: 'R', axis: 'y', oct: 3 },
-    routes: [ { hand: 'L', src: 'pinch', target: 'fx.filt.freq', min: .2, max: 1, smooth: .5 },
-              { hand: 'L', src: 'y', target: 'fx.harm.mix', min: 0, max: .9, smooth: .5 },
-              { hand: 'R', src: 'roll', target: 'fx.vib.depth', min: 0, max: .5, smooth: .5 } ] },
+    routes: [ { hand: 'L', src: 'pinch', target: 'fx.filt.freq', min: .2, max: 1, smooth: .30 },
+              { hand: 'L', src: 'y', target: 'fx.harm.mix', min: 0, max: .9, smooth: .30 },
+              { hand: 'R', src: 'roll', target: 'fx.vib.depth', min: 0, max: .5, smooth: .30 } ] },
   { name: 'Firefly Theremin', blurb: 'Right hand height is pitch, and opening the hand makes it sing. Left height adds the warble, left pinch the echo, and left side-to-side the room.',
     fx: ['vib','dly','rev'], params: { 'fx.vib.depth': .1, 'fx.dly.mix': .25, 'fx.dly.time': .42, 'fx.dly.fb': .45, 'fx.rev.mix': .4 },
     voice: { id: 'theremin', hand: 'R', axis: 'y', oct: 4, range: 2, snap: true },
-    routes: [ { hand: 'L', src: 'y', target: 'fx.vib.depth', min: 0, max: .8, smooth: .5 },
-              { hand: 'L', src: 'pinch', target: 'fx.dly.mix', min: 0, max: .8, smooth: .4 },
-              { hand: 'L', src: 'x', target: 'fx.rev.mix', min: .1, max: .9, smooth: .6 } ] },
+    routes: [ { hand: 'L', src: 'y', target: 'fx.vib.depth', min: 0, max: .8, smooth: .30 },
+              { hand: 'L', src: 'pinch', target: 'fx.dly.mix', min: 0, max: .8, smooth: .24 },
+              { hand: 'L', src: 'x', target: 'fx.rev.mix', min: .1, max: .9, smooth: .36 } ] },
   { name: 'Kalimba Rain', blurb: 'Pinch with your right hand to pluck, and drag up or down while pinched to strum. Left height lengthens the echoes, left side-to-side adds room, left pinch sets the sway.',
     fx: ['dly','rev','pan','filt'], params: { 'fx.dly.mix': .3, 'fx.dly.time': .3, 'fx.dly.fb': .5, 'fx.rev.mix': .35, 'fx.pan.mix': .5 },
     voice: { id: 'kalimba', hand: 'R', axis: 'y', oct: 4, range: 2, strum: true },
-    routes: [ { hand: 'L', src: 'y', target: 'fx.dly.fb', min: .1, max: .9, smooth: .5 },
-              { hand: 'L', src: 'x', target: 'fx.rev.mix', min: .1, max: .85, smooth: .5 },
-              { hand: 'L', src: 'pinch', target: 'fx.pan.rate', min: .05, max: .7, smooth: .5 } ],
+    routes: [ { hand: 'L', src: 'y', target: 'fx.dly.fb', min: .1, max: .9, smooth: .30 },
+              { hand: 'L', src: 'x', target: 'fx.rev.mix', min: .1, max: .85, smooth: .30 },
+              { hand: 'L', src: 'pinch', target: 'fx.pan.rate', min: .05, max: .7, smooth: .30 } ],
     lfos: [ { on: true, shape: 'random', rate: .6, depth: .25, target: 'fx.filt.freq' } ] },
   { name: 'Pump Organ', blurb: 'Pinch and hold with your right hand to sound a chord, and move up or down to change it. Sing over the top. Left height opens the bellows (filter), and left pinch adds the shake.',
     fx: ['filt','trem','rev','warm'], params: { 'fx.filt.freq': 2400, 'fx.trem.mix': 0, 'fx.trem.rate': 5.5, 'fx.rev.mix': .35, 'fx.warm.drive': .2 },
     voice: { id: 'organ', hand: 'R', axis: 'y', oct: 3, range: 1.2 },
-    routes: [ { hand: 'L', src: 'y', target: 'fx.filt.freq', min: .2, max: .95, smooth: .5 },
-              { hand: 'L', src: 'pinch', target: 'fx.trem.mix', min: 0, max: .9, invert: true, smooth: .4 },
-              { hand: 'L', src: 'roll', target: 'fx.trem.rate', min: .2, max: .8, smooth: .5 } ] },
+    routes: [ { hand: 'L', src: 'y', target: 'fx.filt.freq', min: .2, max: .95, smooth: .30 },
+              { hand: 'L', src: 'pinch', target: 'fx.trem.mix', min: 0, max: .9, invert: true, smooth: .24 },
+              { hand: 'L', src: 'roll', target: 'fx.trem.rate', min: .2, max: .8, smooth: .30 } ] },
   { name: 'Chapel Bells', blurb: 'Right pinch rings a bell, and strumming down rings a peal. Left height fills the nave, and left pinch blooms the chorus.',
     fx: ['chor','dly','rev'], params: { 'fx.rev.mix': .55, 'fx.dly.mix': .18, 'fx.chor.mix': .2 },
     voice: { id: 'bell', hand: 'R', axis: 'y', oct: 4, range: 2, strum: true },
-    routes: [ { hand: 'L', src: 'y', target: 'fx.rev.mix', min: .2, max: 1, smooth: .5 },
-              { hand: 'L', src: 'pinch', target: 'fx.chor.mix', min: 0, max: 1, smooth: .5 } ] },
-  { name: 'Wild Weather', blurb: 'Every knob in the rack. Left hand: pinch for harmonies, height for room, side-to-side for echo time, tilt for sway speed. Right hand strums the dulcimer, and moving it closer feeds the echo. Four weathers drift the rest.',
-    fx: ['harm','filt','vib','phas','trem','pan','dly','rev'], params: { 'fx.harm.a': 3, 'fx.harm.b': 7, 'fx.harm.mix': 0, 'fx.phas.mix': .35, 'fx.trem.mix': .25, 'fx.pan.mix': .6, 'fx.dly.mix': .3, 'fx.rev.mix': .35, 'fx.vib.depth': .05 },
+    routes: [ { hand: 'L', src: 'y', target: 'fx.rev.mix', min: .2, max: 1, smooth: .30 },
+              { hand: 'L', src: 'pinch', target: 'fx.chor.mix', min: 0, max: 1, smooth: .30 } ] },
+  { name: 'Wild Weather', blurb: 'Every knob in the rack. Left hand: pinch for harmonies, height for room, side-to-side for echo time, tilt for sway speed. Right hand strums the dulcimer, moving it closer feeds the echo, and tilting it sweeps the phaser. Four weathers drift the rest.',
+    fx: ['harm','filt','vib','phas','trem','pan','dly','rev'], params: { 'fx.harm.a': 7, 'fx.harm.b': 12, 'fx.harm.mix': 0, 'fx.phas.mix': .35, 'fx.trem.mix': .25, 'fx.pan.mix': .6, 'fx.dly.mix': .3, 'fx.rev.mix': .35, 'fx.vib.depth': .05 },
     voice: { id: 'dulcimer', hand: 'R', axis: 'y', oct: 4, range: 2, strum: true },
-    routes: [ { hand: 'L', src: 'pinch', target: 'fx.harm.mix', min: 0, max: 1, curve: 's', smooth: .45 },
-              { hand: 'L', src: 'y', target: 'fx.rev.mix', min: .1, max: .9, smooth: .5 },
-              { hand: 'L', src: 'x', target: 'fx.dly.time', min: .1, max: .9, smooth: .7, onLost: 'hold' },
-              { hand: 'L', src: 'roll', target: 'fx.pan.rate', min: .05, max: .8, smooth: .5 },
-              { hand: 'R', src: 'depth', target: 'fx.dly.fb', min: .1, max: .9, smooth: .5 },
-              { hand: 'R', src: 'open', target: 'fx.phas.mix', min: 0, max: .8, smooth: .5 } ],
+    routes: [ { hand: 'L', src: 'pinch', target: 'fx.harm.mix', min: 0, max: 1, curve: 's', smooth: .27 },
+              { hand: 'L', src: 'y', target: 'fx.rev.mix', min: .1, max: .9, smooth: .30 },
+              { hand: 'L', src: 'x', target: 'fx.dly.time', min: .1, max: .9, smooth: .42, onLost: 'hold' },
+              { hand: 'L', src: 'roll', target: 'fx.pan.rate', min: .05, max: .8, smooth: .30 },
+              { hand: 'R', src: 'depth', target: 'fx.dly.fb', min: .1, max: .9, smooth: .30 },
+              { hand: 'R', src: 'roll', target: 'fx.phas.mix', min: 0, max: .8, smooth: .30 } ],
     lfos: [ { on: true, shape: 'sine', rate: .07, depth: .3, target: 'fx.filt.freq' }, { on: true, shape: 'tri', rate: .2, depth: .4, target: 'fx.phas.rate' },
             { on: true, shape: 'random', rate: 1.2, depth: .3, target: 'fx.trem.rate' }, { on: true, shape: 'sine', rate: .03, depth: .25, target: 'fx.chor.mix' } ] },
   { name: 'Blank Loom', blurb: 'Nothing strung yet. Add threads in the Threads tab and switch effects on in the Rack.', fx: [], params: {}, routes: [] }
@@ -730,12 +901,12 @@ const PRESETS = [
 const userPresets = () => store.get('userPresets', []);
 const allPresets = () => PRESETS.concat(userPresets().map(p => Object.assign({ user: true }, p)));
 
-function applyPreset(pr) {
+function applyPreset(pr, fromGuide) {
   S.preset = pr; S.presetName = pr.name;
   for (const id of PARAM_ORDER) { const p = PARAMS[id]; if (!id.startsWith('master') && !id.startsWith('mic')) { p.base = toNorm(p, p.def); p.applied = -1; } }
   if (pr.paramsNorm) for (const k in pr.paramsNorm) if (PARAMS[k]) PARAMS[k].base = pr.paramsNorm[k];
   if (pr.params) for (const k in pr.params) if (PARAMS[k]) PARAMS[k].base = toNorm(PARAMS[k], pr.params[k]);
-  S.fxOn = {}; for (const f of FX) S.fxOn[f.id] = (pr.fx || []).includes(f.id);
+  const on = {}; for (const f of FX) on[f.id] = (pr.fx || []).includes(f.id); setAllFx(on);
   S.routes = (pr.routes || []).map((r, i) => normRoute(r, i));
   S.lfos = [0, 1, 2, 3].map(i => {
     const l = (pr.lfos || [])[i] || {}; const o = { on: !!l.on, shape: l.shape || 'sine', target: l.target || '', phase: Math.random(), rnd: 0, rndT: 0, val: 0 };
@@ -745,13 +916,13 @@ function applyPreset(pr) {
   });
   setVoice(pr.voice || { id: 'none' });
   $('#hudName').textContent = pr.name; $('#hudBlurb').textContent = pr.blurb || '';
-  const hud = $('#hud'); hud.classList.remove('quiet'); clearTimeout(applyPreset._t); applyPreset._t = setTimeout(() => hud.classList.add('quiet'), S.mode === 'mobile' ? 6000 : 12000);
+  const hud = $('#hud'); hud.classList.remove('quiet'); clearTimeout(applyPreset._t); applyPreset._t = setTimeout(() => hud.classList.add('quiet'), S.mode === 'mobile' ? 4000 : 7000);
   $('#presetSel').value = pr.name;
-  store.set('lastPreset', pr.name);
-  renderPanelSoon();
+  if (!TUT.active) store.set('lastPreset', pr.name);
+  hudLegend(); renderPanelSoon();
 }
 function normRoute(r, i) {
-  return Object.assign({ hand: 'R', src: 'pinch', target: 'fx.harm.mix', min: 0, max: 1, curve: 'lin', invert: false, smooth: .4, onLost: 'return', on: true, cc: 20 + (i || 0) }, r, { sm: null, val: 0, srcVal: 0, active: false });
+  return Object.assign({ hand: 'R', src: 'pinch', target: 'fx.harm.mix', min: 0, max: 1, curve: 'lin', invert: false, smooth: .2, onLost: 'return', on: true, cc: 20 + (i || 0) }, r, { sm: null, val: 0, srcVal: 0, active: false });
 }
 function snapshot(name) {
   const paramsNorm = {}; for (const id of PARAM_ORDER) paramsNorm[id] = +PARAMS[id].base.toFixed(4);
@@ -790,82 +961,170 @@ function runAction(a, hand) {
   if (a === 'loop.rec') loopToggle(); else if (a === 'loop.undo') loopUndo(); else if (a === 'loop.mute') loopMuteAll(); else if (a === 'loop.clear') loopClear();
   else if (a === 'preset.next') presetStep(1); else if (a === 'preset.prev') presetStep(-1);
   else if (a === 'freeze') toggleFreeze(); else if (a === 'mic.toggle') toggleMic(); else if (a === 'take.toggle') takeToggle();
-  else if (a.startsWith('fx.')) { const id = a.slice(3); S.fxOn[id] = !S.fxOn[id]; forceApply(`fx.${id}.mix`); stamp(FXMAP[id].name + (S.fxOn[id] ? ' on' : ' off'), FXMAP[id].color); renderPanelSoon(); }
+  else if (a.startsWith('fx.')) { const id = a.slice(3); setFx(id, !S.fxOn[id]); stamp(FXMAP[id].name + (S.fxOn[id] ? ' on' : ' off'), FXMAP[id].color); renderPanelSoon(); }
 }
 function toggleFreeze() { S.frozen = !S.frozen; stamp(S.frozen ? 'frozen' : 'thawed', '#2f4a6b'); updateTopbar(); }
 
 /* =====================================================================
-   HAND TRACKING
+   HAND TRACKING — MediaPipe runs in a Web Worker (main-thread fallback),
+   One Euro smoothing, handedness-stable identity, finger hysteresis
    ===================================================================== */
-const TRK = { landmarker: null, lastVT: -1, video: null };
+const TRK = { lm: null, worker: null, busy: false, lastSent: 0, video: null, ms: 0, hz: 0, nRes: 0, tRes: 0, mode: 'none' };
 const CONN = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+const absURL = u => new URL(u, location.href).href;
+const WORKER_SRC = `
+let lm = null;
+self.onmessage = async (e) => {
+  const d = e.data;
+  if (d.type === 'init') {
+    try {
+      const mod = await import(d.mp + '/vision_bundle.mjs');
+      const fs = await mod.FilesetResolver.forVisionTasks(d.mp + '/wasm');
+      // module workers can't importScripts the wasm loader; load it into global scope ourselves
+      let code = null;
+      const ensureMF = async () => { if (typeof self.ModuleFactory === 'undefined') { code = code || await (await fetch(fs.wasmLoaderPath)).text(); (0, eval)(code); } };
+      const mk = async (dg) => { await ensureMF(); return mod.HandLandmarker.createFromOptions(fs, { baseOptions: { modelAssetPath: d.model, delegate: dg }, runningMode: 'VIDEO', numHands: d.numHands, minHandDetectionConfidence: d.conf, minHandPresenceConfidence: d.conf, minTrackingConfidence: .5 }); };
+      try { lm = await mk('GPU'); } catch (err) { lm = await mk('CPU'); }
+      self.postMessage({ type: 'ready' });
+    } catch (err) { self.postMessage({ type: 'error', msg: String(err && err.message || err) }); }
+  } else if (d.type === 'frame') {
+    const t0 = performance.now(); let out = { landmarks: [], handedness: [] };
+    try { out = lm.detectForVideo(d.bmp, d.ts); } catch (err) {}
+    try { d.bmp.close(); } catch (err) {}
+    self.postMessage({ type: 'result', lms: out.landmarks || [], hd: (out.handedness || []).map(h => h && h[0] ? [h[0].categoryName, h[0].score] : ['?', 0]), ts: d.ts, ms: performance.now() - t0 });
+  }
+};`;
 async function initTracking(setMsg) {
   if (S.sandbox || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { enablePointerHands('no camera here'); return; }
   const v = $('#cam'); TRK.video = v;
   try {
     setMsg('asking for the camera…');
-    const st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', deviceId: S.settings.camId ? { exact: S.settings.camId } : undefined, width: { ideal: S.mode === 'mobile' ? 640 : 1280 }, height: { ideal: S.mode === 'mobile' ? 480 : 720 } }, audio: false });
+    const st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', deviceId: S.settings.camId ? { exact: S.settings.camId } : undefined, width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 30, max: 30 } }, audio: false });
     v.srcObject = st; TRK.stream = st; await v.play(); S.camOn = true;
   } catch (e) { console.warn('camera', e); enablePointerHands('camera unavailable'); return; }
+  setMsg('stringing the loom (loading hand model)…');
+  const cfg = { type: 'init', mp: absURL(CDN.mp), model: absURL(CDN.model), numHands: S.mode === 'mobile' ? 1 : 2, conf: S.settings.conf };
+  const viaWorker = await new Promise(res => {
+    if (S.settings.noWorker || typeof Worker === 'undefined' || typeof createImageBitmap === 'undefined') return res(false);
+    try {
+      const w = new Worker(URL.createObjectURL(new Blob([WORKER_SRC], { type: 'text/javascript' })), { type: 'module' });
+      const to = setTimeout(() => { w.terminate(); res(false); }, 45000);
+      w.onmessage = e => {
+        const d = e.data;
+        if (d.type === 'ready') { clearTimeout(to); TRK.worker = w; res(true); }
+        else if (d.type === 'error') { clearTimeout(to); console.warn('worker tracker', d.msg); w.terminate(); res(false); }
+        else if (d.type === 'result') { TRK.busy = false; onResults(d.lms, d.hd, d.ms); }
+      };
+      w.onerror = e => { clearTimeout(to); console.warn('worker error', e.message); res(false); };
+      w.postMessage(cfg);
+    } catch (e) { res(false); }
+  });
+  if (viaWorker) { TRK.mode = 'worker'; S.trackerReady = true; return; }
   try {
-    setMsg('stringing the loom (loading hand model)…');
     const mod = await import(CDN.mp + '/vision_bundle.mjs');
     const fs = await mod.FilesetResolver.forVisionTasks(CDN.mp + '/wasm');
-    const opts = d => ({ baseOptions: { modelAssetPath: CDN.model, delegate: d }, runningMode: 'VIDEO', numHands: S.mode === 'mobile' ? 1 : 2, minHandDetectionConfidence: S.settings.conf, minHandPresenceConfidence: S.settings.conf, minTrackingConfidence: .5 });
-    try { TRK.landmarker = await mod.HandLandmarker.createFromOptions(fs, opts('GPU')); }
-    catch (e) { console.warn('GPU delegate failed, using CPU', e); TRK.landmarker = await mod.HandLandmarker.createFromOptions(fs, opts('CPU')); }
-    S.trackerReady = true;
+    const opts = d => ({ baseOptions: { modelAssetPath: CDN.model, delegate: d }, runningMode: 'VIDEO', numHands: cfg.numHands, minHandDetectionConfidence: S.settings.conf, minHandPresenceConfidence: S.settings.conf, minTrackingConfidence: .5 });
+    try { TRK.lm = await mod.HandLandmarker.createFromOptions(fs, opts('GPU')); }
+    catch (e) { TRK.lm = await mod.HandLandmarker.createFromOptions(fs, opts('CPU')); }
+    TRK.mode = 'main'; S.trackerReady = true;
   } catch (e) { console.warn('model', e); enablePointerHands('hand model failed to load'); }
 }
 function enablePointerHands(why) { S.pointerHands = true; if (why && S.started) toast('Mouse / touch plays the hands (' + why + ')', 3500); else S._ptrWhy = why; }
+function detectHz() { return Q().detectHz; }
 function detect(now) {
-  const v = TRK.video; if (!TRK.landmarker || !v || v.readyState < 2) return;
-  if (v.currentTime === TRK.lastVT) return; TRK.lastVT = v.currentTime;
-  let res; try { res = TRK.landmarker.detectForVideo(v, now); } catch (e) { return; }
-  ingest((res.landmarks || []).map(lm => ({ lm })), now, 'cam');
+  const v = TRK.video; if (!S.trackerReady || !v || v.readyState < 2) return;
+  if (now - TRK.lastSent < 1000 / detectHz()) return;
+  if (TRK.mode === 'worker') {
+    if (TRK.busy && now - TRK.lastSent < 600) return;   // back-pressure: one frame in flight
+    TRK.busy = true; TRK.lastSent = now;
+    const ts = now;
+    createImageBitmap(v).then(bmp => TRK.worker.postMessage({ type: 'frame', bmp, ts }, [bmp])).catch(() => { TRK.busy = false; });
+  } else if (TRK.lm) {
+    TRK.lastSent = now; const t0 = performance.now(); let res;
+    try { res = TRK.lm.detectForVideo(v, now); } catch (e) { return; }
+    onResults(res.landmarks || [], (res.handedness || []).map(h => h && h[0] ? [h[0].categoryName, h[0].score] : ['?', 0]), performance.now() - t0);
+  }
 }
-// view mapping (video -> canvas, cover fit)
+function onResults(lms, hd, ms) {
+  TRK.ms = lerp(TRK.ms || ms, ms, .1);
+  const now = performance.now(); TRK.nRes++; if (now - TRK.tRes > 1000) { TRK.hz = TRK.nRes * 1000 / (now - TRK.tRes); TRK.nRes = 0; TRK.tRes = now; }
+  ingest(lms.map((lm, i) => ({ lm, label: hd[i] && hd[i][0], score: hd[i] ? hd[i][1] : 0 })), now, 'cam');
+}
+// view mapping (video -> stage, cover fit, same math as CSS object-fit:cover)
 const VIEW = { cw: 1, ch: 1, dw: 1, dh: 1, ox: 0, oy: 0 };
 function computeView() {
   const v = TRK.video; const cw = VIEW.cw, ch = VIEW.ch;
   const vw = (v && v.videoWidth) || 640, vh = (v && v.videoHeight) || 480;
   const sc = Math.max(cw / vw, ch / vh); VIEW.dw = vw * sc; VIEW.dh = vh * sc; VIEW.ox = (cw - VIEW.dw) / 2; VIEW.oy = (ch - VIEW.dh) / 2;
 }
+/* One Euro filter: smooth when still, responsive when moving */
+class OneEuro {
+  constructor(minCut = 1.2, beta = .02, dCut = 1) { this.minCut = minCut; this.beta = beta; this.dCut = dCut; this.x = null; this.dx = 0; this.t = 0; }
+  static a(cut, dt) { const r = 2 * Math.PI * cut * dt; return r / (r + 1); }
+  f(v, t) {
+    if (this.x == null) { this.x = v; this.t = t; return v; }
+    const dt = Math.max(1e-3, (t - this.t) / 1000); this.t = t;
+    const dv = (v - this.x) / dt; this.dx = lerp(this.dx, dv, OneEuro.a(this.dCut, dt));
+    const cut = this.minCut + this.beta * Math.abs(this.dx);
+    this.x = lerp(this.x, v, OneEuro.a(cut, dt)); return this.x;
+  }
+  reset() { this.x = null; this.dx = 0; }
+}
+const FEAT_FILTER = { x: [1.0, .6], y: [1.0, .6], pinch: [1.4, .9], open: [1.2, .6], roll: [1.0, .5], depth: [.8, .4] };
+function filtersFor(hd) { if (!hd.oe) { hd.oe = {}; for (const k in FEAT_FILTER) hd.oe[k] = new OneEuro(FEAT_FILTER[k][0], FEAT_FILTER[k][1]); hd.ext = [false, false, false, false]; } return hd.oe; }
 function ingest(list, now, src) {
   const cw = VIEW.cw, ch = VIEW.ch, mn = Math.min(cw, ch);
   const mapped = list.map(o => {
     const pts = o.lm.map(p => ({ x: VIEW.ox + (S.settings.mirror ? 1 - p.x : p.x) * VIEW.dw, y: VIEW.oy + p.y * VIEW.dh }));
     const c = [0, 5, 9, 13, 17].reduce((a, i) => ({ x: a.x + pts[i].x / 5, y: a.y + pts[i].y / 5 }), { x: 0, y: 0 });
-    return { pts, c };
+    // MediaPipe labels handedness as if the image were mirrored; raw selfie frames are not, so its "Left" is the player's right
+    let who = null; if (o.label === 'Left' || o.label === 'Right') who = o.label === 'Left' ? 'R' : 'L';
+    return { pts, c, who, score: o.score || 0 };
   });
   let assign = {};
   if (S.mode === 'mobile') { if (mapped[0]) assign.R = mapped[0]; }
-  else if (mapped.length >= 2) { mapped.sort((a, b) => a.c.x - b.c.x); assign.L = mapped[0]; assign.R = mapped[1]; }
-  else if (mapped.length === 1) { assign[mapped[0].c.x < cw / 2 ? 'L' : 'R'] = mapped[0]; }
+  else if (S.settings.identity === 'side' || mapped.some(m => !m.who)) {
+    if (mapped.length >= 2) { mapped.sort((a, b) => a.c.x - b.c.x); assign.L = mapped[0]; assign.R = mapped[1]; }
+    else if (mapped.length === 1) assign[mapped[0].c.x < cw / 2 ? 'L' : 'R'] = mapped[0];
+  } else {
+    // handedness, but an identity only flips after it disagrees with nearest-previous for ~8 frames (no swaps when hands cross)
+    for (const m of mapped) {
+      let k = m.who;
+      const prev = ['L', 'R'].map(id => S.hands[id]).filter(h => h.present && h.src === 'cam').sort((a, b) => Math.hypot(a.cx - m.c.x, a.cy - m.c.y) - Math.hypot(b.cx - m.c.x, b.cy - m.c.y))[0];
+      if (prev && prev.id !== k && Math.hypot(prev.cx - m.c.x, prev.cy - m.c.y) < mn * .12) { prev.disagree = (prev.disagree || 0) + 1; if (prev.disagree < 8) k = prev.id; else prev.disagree = 0; }
+      else if (prev) prev.disagree = 0;
+      if (assign[k]) k = k === 'L' ? 'R' : 'L';
+      assign[k] = m;
+    }
+  }
   if (S.settings.swap) assign = { L: assign.R, R: assign.L };
   for (const k of ['L', 'R']) {
     const hd = S.hands[k];
-    if (hd.src && hd.src !== 'cam' && src === 'cam') continue; // pad owns it
+    if (hd.src && hd.src !== 'cam' && src === 'cam') continue; // pad / ghost own it
     if (!assign[k]) continue;
     const { pts, c } = assign[k];
+    const oe = filtersFor(hd);
+    if (!hd.present) for (const f in oe) oe[f].reset();
     const d = (a, b) => Math.hypot(pts[a].x - pts[b].x, pts[a].y - pts[b].y);
-    const size = Math.max(1, d(0, 9));
+    const size = Math.max(1, .6 * d(0, 9) + .4 * d(5, 17) * 1.6);
     const pinchRaw = d(4, 8) / size;
     const ratio = (t, p) => d(t, 0) / Math.max(1, d(p, 0));
     const fing = [[8, 6], [12, 10], [16, 14], [20, 18]].map(([t, p]) => ratio(t, p));
-    const ext = fing.map(r => r > 1.25);
+    hd.ext = fing.map((r, i) => hd.ext[i] ? r > 1.15 : r > 1.32);    // per-finger hysteresis
     const thumbExt = d(4, 17) > d(3, 17) * 1.04 && d(4, 5) / size > .55;
     const open = fing.reduce((a, r) => a + clamp((r - .85) / .9), 0) / 4;
     const ang = Math.atan2(pts[9].x - pts[0].x, -(pts[9].y - pts[0].y));
-    const dt = Math.max(1, now - (hd.lastSeen || now - 16)) / 1000;
-    const sp = hd.present ? Math.hypot(c.x - hd.cx, c.y - hd.cy) / mn / dt : 0;
-    const raw = { x: clamp(c.x / cw), y: clamp(1 - c.y / ch), pinch: clamp((pinchRaw - .18) / 1.0), open: clamp(open), roll: clamp(.5 + ang / (Math.PI * .9)), depth: clamp((size / mn - .08) / .32), speed: clamp(sp / 2.5) };
-    const a = hd.present ? .55 : 1;
-    for (const key in raw) hd.f[key] = lerp(hd.f[key], raw[key], key === 'speed' ? .3 : a);
-    hd.pinchRaw = pinchRaw; hd.pts = pts; hd.cx = c.x; hd.cy = c.y; hd.lastSeen = now; hd.present = true; hd.src = src;
-    // pose
+    const raw = { x: clamp(c.x / cw), y: clamp(1 - c.y / ch), pinch: clamp((pinchRaw - .18) / 1.0), open: clamp(open), roll: clamp(.5 + ang / (Math.PI * .9)), depth: clamp((size / mn - .08) / .32) };
+    const px = hd.f.x, py = hd.f.y;
+    for (const key in raw) hd.f[key] = oe[key].f(raw[key], now);
+    const dt = Math.max(16, now - (hd.lastSeen || now - 33)) / 1000;
+    hd.f.speed = hd.present ? lerp(hd.f.speed, clamp(Math.hypot(hd.f.x - px, hd.f.y - py) / dt / 2.5), .3) : 0;
+    hd.pinchRaw = pinchRaw; hd.pts = pts; hd.cx = c.x; hd.cy = c.y; hd.lastSeen = now; hd.present = true; hd.src = src; hd.goneSince = 0;
+    // pose (skipped near the frame edge, where landmarks get unreliable)
+    const edge = c.x < cw * .04 || c.x > cw * .96 || c.y < ch * .04 || c.y > ch * .96;
+    if (edge) continue;
     let pose = 'other';
-    const [i, m, r, p] = ext;
+    const [i, m, r, p] = hd.ext;
     if (thumbExt && !i && !m && !r && !p && pts[4].y < pts[0].y - size * .5) pose = 'thumb';
     else if (!i && !m && !r && !p) pose = 'fist';
     else if (pinchRaw < .32 && m && r && p) pose = 'ok';
@@ -877,17 +1136,32 @@ function ingest(list, now, src) {
     updatePose(hd, pose, now);
   }
 }
+const SLOW_ACTIONS = { 'preset.next': 2, 'preset.prev': 2, 'loop.clear': 2.5 };
+function poseAction(hd, pose) { return ((S.poses || {})[hd.id] || {})[pose]; }
 function updatePose(hd, pose, now) {
   hd.pose = pose;
   if (pose !== hd.cand) { hd.cand = pose; hd.candSince = now; }
-  if (hd.cand !== hd.stablePose && now - hd.candSince > S.settings.poseHold) {
-    hd.stablePose = hd.cand;
-    const act = ((S.poses || {})[hd.id] || {})[hd.stablePose];
-    if (act && act !== 'none') { stamp(POSE_LABEL[hd.stablePose] + ' → ' + ACTIONS[act], '#a3402f', hd); runAction(act, hd.id); }
+  const neutral = hd.cand === 'open' || hd.cand === 'other' || hd.cand === 'none';
+  if (neutral) hd.armed = true;          // must pass through a neutral hand before the same sign fires again
+  const act = poseAction(hd, hd.cand);
+  const need = S.settings.poseHold * (SLOW_ACTIONS[act] || 1);
+  hd.holdFrac = act && act !== 'none' && hd.cand !== hd.stablePose ? clamp((now - hd.candSince) / need) : 0;
+  if (hd.cand !== hd.stablePose && now - hd.candSince > need) {
+    const prevStable = hd.stablePose; hd.stablePose = hd.cand;
+    if (act && act !== 'none' && (hd.armed || prevStable !== hd.cand) && now - (hd.lastFire || 0) > 800) {
+      hd.lastFire = now; hd.armed = false;
+      stamp(POSE_LABEL[hd.stablePose] + ' → ' + ACTIONS[act], '#a3402f', hd); runAction(act, hd.id);
+      if (TUT.active) TUT.onAction && TUT.onAction(act);
+    }
   }
 }
 function expireHands(now) {
-  for (const k of ['L', 'R']) { const hd = S.hands[k]; if (hd.present && hd.src === 'cam' && now - hd.lastSeen > 160) { hd.present = false; hd.stablePose = hd.cand = 'none'; } }
+  for (const k of ['L', 'R']) {
+    const hd = S.hands[k];
+    if (hd.present && hd.src === 'cam' && now - hd.lastSeen > 160) { hd.present = false; hd.goneSince = now; }
+    // keep the held sign through short tracking dropouts so a flicker can't re-fire it
+    if (!hd.present && hd.goneSince && now - hd.goneSince > 600) { hd.stablePose = hd.cand = 'none'; hd.armed = true; hd.goneSince = 0; hd.holdFrac = 0; }
+  }
 }
 /* pointer hands (fallback or by choice) + mobile pad */
 const PTR = new Map();
@@ -901,27 +1175,30 @@ function setupPointers() {
     const pressed = e.pointerType === 'mouse' ? (e.buttons & 1) === 1 : down !== false;
     PTR.set(e.pointerId, { k, x, y, pressed });
     const hd = S.hands[k], now = performance.now();
+    if (hd.src === 'ghost') return;
     const dt = Math.max(.008, (now - (hd.lastSeen || now)) / 1000);
     hd.f.speed = lerp(hd.f.speed, clamp(Math.hypot(x - hd.f.x, (1 - y) - hd.f.y) / dt / 2.5), .3);
     hd.f.x = x; hd.f.y = 1 - y; hd.f.pinch = pressed ? 0 : 1; hd.f.open = pressed ? 1 : .35; hd.f.roll = .5; hd.f.depth = .5;
     hd.pinchRaw = pressed ? .1 : 1; hd.present = true; hd.src = 'ptr'; hd.lastSeen = now; hd.pts = null; hd.cx = x * VIEW.cw; hd.cy = y * VIEW.ch;
   };
-  const end = e => { const p = PTR.get(e.pointerId); if (!p) return; PTR.delete(e.pointerId); if (e.pointerType === 'mouse' && e.type === 'pointerup') { upd(e, false); return; } const hd = S.hands[p.k]; if (hd.src === 'ptr') { hd.present = false; hd.src = null; } };
+  const drop = k => { const hd = S.hands[k]; if (hd.src === 'ptr') { hd.present = false; hd.src = null; } };
+  const end = e => { const p = PTR.get(e.pointerId); if (!p) return; PTR.delete(e.pointerId); if (e.pointerType === 'mouse' && e.type === 'pointerup') { upd(e, false); return; } drop(p.k); };
   cv.addEventListener('pointerdown', e => { if (!S.pointerHands) return; cv.setPointerCapture(e.pointerId); upd(e, true); });
   cv.addEventListener('pointermove', e => upd(e));
   cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
-  cv.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') { const p = PTR.get(e.pointerId); PTR.delete(e.pointerId); if (p) { const hd = S.hands[p.k]; if (hd.src === 'ptr') { hd.present = false; hd.src = null; } } } });
+  cv.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') { const p = PTR.get(e.pointerId); PTR.delete(e.pointerId); if (p) drop(p.k); } });
   // mobile pad -> left hand
   const pad = $('#pad'), dot = pad.querySelector('.dot');
   const padUpd = e => {
+    const hd = S.hands.L; if (hd.src === 'ghost') return;
     const r = pad.getBoundingClientRect(), x = clamp((e.clientX - r.left) / r.width), y = clamp((e.clientY - r.top) / r.height);
-    const hd = S.hands.L; hd.present = true; hd.src = 'pad'; hd.lastSeen = performance.now(); hd.pts = null;
+    hd.present = true; hd.src = 'pad'; hd.lastSeen = performance.now(); hd.pts = null;
     hd.f.x = x; hd.f.y = 1 - y; hd.f.pinch = 1 - y; hd.f.open = 1 - y; hd.f.roll = x; hd.f.depth = .5; hd.pinchRaw = 1;
     dot.style.display = 'block'; dot.style.left = (x * 100) + '%'; dot.style.top = (y * 100) + '%';
   };
   pad.addEventListener('pointerdown', e => { pad.setPointerCapture(e.pointerId); padUpd(e); });
   pad.addEventListener('pointermove', e => { if (e.buttons || e.pointerType !== 'mouse') padUpd(e); });
-  const padEnd = () => { const hd = S.hands.L; hd.present = false; hd.src = null; dot.style.display = 'none'; };
+  const padEnd = () => { const hd = S.hands.L; if (hd.src === 'pad') { hd.present = false; hd.src = null; } dot.style.display = 'none'; };
   pad.addEventListener('pointerup', padEnd); pad.addEventListener('pointercancel', padEnd);
 }
 
@@ -930,12 +1207,19 @@ function setupPointers() {
    ===================================================================== */
 const CURVES = { lin: v => v, exp: v => v * v, log: v => Math.sqrt(v), s: v => v * v * (3 - 2 * v), toggle: v => v > .5 ? 1 : 0 };
 const SRC_LABEL = { pinch: 'pinch spread', y: 'height', x: 'side-to-side', open: 'openness', roll: 'tilt', depth: 'closeness', speed: 'speed' };
+let applyAcc = 0;
+function handHeld(hd) {
+  // while a hand forms a mapped sign (e.g. ✊ to loop) its threads hold still, so the gesture itself never moves the sound
+  const act = ((S.poses || {})[hd.id] || {})[hd.cand];
+  return act && act !== 'none';
+}
 function modTick(dt) {
   const over = {};
   for (const r of S.routes) {
     const p = PARAMS[r.target]; if (!p || !r.on) { r.active = false; continue; }
     const hd = S.hands[r.hand];
-    if (S.frozen) { if (r.sm != null) over[r.target] = r.sm; continue; }
+    if (S.frozen || (hd.present && handHeld(hd))) { if (r.sm != null) over[r.target] = r.sm; r.held = true; continue; }
+    r.held = false;
     if (hd.present) {
       let v = hd.f[r.src]; if (r.invert) v = 1 - v; r.srcVal = v;
       const mapped = lerp(r.min, r.max, (CURVES[r.curve] || CURVES.lin)(clamp(v)));
@@ -947,7 +1231,7 @@ function modTick(dt) {
       r.active = false; r.srcVal = 0;
       if (r.sm != null) {
         if (r.onLost === 'hold') over[r.target] = r.sm;
-        else { r.sm = lerp(r.sm, p.base, .12); if (Math.abs(r.sm - p.base) < .003) r.sm = null; else over[r.target] = r.sm; }
+        else { r.sm = lerp(r.sm, p.base, 1 - Math.pow(.88, dt * 60)); if (Math.abs(r.sm - p.base) < .003) r.sm = null; else over[r.target] = r.sm; }
       }
     }
   }
@@ -955,129 +1239,140 @@ function modTick(dt) {
   S.lfos.forEach((l, i) => {
     if (!l.on || !l.target || !PARAMS[l.target]) { l.val = 0; return; }
     const rate = toReal(PARAMS[`lfo${i + 1}.rate`], PARAMS[`lfo${i + 1}.rate`].cur), depth = PARAMS[`lfo${i + 1}.depth`].cur;
-    l.phase = (l.phase + rate * dt) % 1;
+    const prevPh = l.phase; l.phase = (l.phase + rate * dt) % 1;
     let w;
     if (l.shape === 'sine') w = Math.sin(l.phase * 2 * Math.PI);
     else if (l.shape === 'tri') w = 1 - 4 * Math.abs(l.phase - .5);
     else if (l.shape === 'saw') w = 2 * l.phase - 1;
     else if (l.shape === 'square') w = l.phase < .5 ? 1 : -1;
-    else { if (l.phase < l.rndT) l.rnd = Math.random() * 2 - 1; l.rndT = l.phase; w = l.val + (l.rnd - l.val) * .05; }
+    else { if (l.phase < prevPh) l.rnd = Math.random() * 2 - 1; w = l.val + (l.rnd - l.val) * Math.min(1, dt * 3); }
     l.val = w; add[l.target] = (add[l.target] || 0) + w * depth * .5;
   });
+  // audio params are touched at ~30 Hz (hand data arrives at ≤30 Hz anyway) — far fewer automation events
+  applyAcc += dt; const doApply = applyAcc >= 1 / 30; if (doApply) applyAcc = 0;
   for (const id of PARAM_ORDER) {
     const p = PARAMS[id];
     let n = over[id] != null ? over[id] : p.base;
     if (add[id]) n += add[id];
     n = clamp(n); p.cur = n;
-    if (Math.abs(n - p.applied) > .0015) { p.applied = n; try { p.apply(toReal(p, n)); } catch (e) {} }
+    if ((doApply || p.applied < 0) && Math.abs(n - p.applied) > .004) { p.applied = n; try { p.apply(toReal(p, n)); } catch (e) {} }
   }
+}
+
+/* =====================================================================
+   QUALITY — the browser does the heavy lifting on the GPU (CSS filters/blend),
+   the canvas only draws ink. Auto mode steps down if frames get slow.
+   ===================================================================== */
+const QUALITY = {
+  lite:     { label: 'Light',    dpr: 1,    fps: 30, paint: false, paintHz: 0,  detectHz: 20, scopeHz: 15, spectro: false },
+  balanced: { label: 'Balanced', dpr: 1.25, fps: 60, paint: true,  paintHz: 20, detectHz: 30, scopeHz: 30, spectro: true },
+  full:     { label: 'Full',     dpr: 2,    fps: 60, paint: true,  paintHz: 30, detectHz: 30, scopeHz: 50, spectro: true }
+};
+const PERF = { ema: 16, slowSince: 0, lastDraw: 0, lastPaint: 0, lastScope: 0, fps: 60, frames: 0, tF: 0, drawMs: 0 };
+function Q() { return QUALITY[S.q] || QUALITY.balanced; }
+function initQuality() {
+  const want = S.settings.quality || 'auto';
+  S.q = want === 'auto' ? (S.mode === 'mobile' ? 'lite' : 'balanced') : want;
+}
+function perfWatch(dtMs, now) {
+  PERF.ema = lerp(PERF.ema, dtMs, .05);
+  PERF.frames++; if (now - PERF.tF > 1000) { PERF.fps = PERF.frames * 1000 / (now - PERF.tF); PERF.frames = 0; PERF.tF = now; }
+  if ((S.settings.quality || 'auto') !== 'auto' || TUT.active) return;
+  if (PERF.ema > 26) { PERF.slowSince = PERF.slowSince || now; if (now - PERF.slowSince > 3000) { const order = ['full', 'balanced', 'lite']; const i = order.indexOf(S.q); if (i < 2) { S.q = order[i + 1]; resize(); toast('Running light to keep things smooth (' + Q().label + ')'); } PERF.slowSince = 0; PERF.ema = 16; } }
+  else PERF.slowSince = 0;
 }
 
 /* =====================================================================
    PAINTER
    ===================================================================== */
-const P = { cv: null, ctx: null, paint: null, pctx: null, grain: null, dpr: 1, t: 0 };
+const P = { cv: null, ctx: null, paint: null, pctx: null, dpr: 1, t: 0 };
 function setupPainter() {
   P.cv = $('#stage'); P.ctx = P.cv.getContext('2d');
-  P.paint = document.createElement('canvas'); P.pctx = P.paint.getContext('2d');
-  const g = document.createElement('canvas'); g.width = g.height = 200; const gx = g.getContext('2d'); const id = gx.createImageData(200, 200);
-  for (let i = 0; i < id.data.length; i += 4) { const v = 200 + Math.random() * 55; id.data[i] = v; id.data[i + 1] = v * .95; id.data[i + 2] = v * .85; id.data[i + 3] = 255; }
-  gx.putImageData(id, 0, 0);
-  gx.strokeStyle = 'rgba(120,90,50,.18)'; for (let i = 0; i < 60; i++) { gx.beginPath(); const x = Math.random() * 200, y = Math.random() * 200, a = Math.random() * 6.28; gx.moveTo(x, y); gx.quadraticCurveTo(x + Math.cos(a) * 8, y + Math.sin(a) * 8 + 3, x + Math.cos(a) * 16, y + Math.sin(a) * 16); gx.stroke(); }
-  P.grain = P.ctx.createPattern(g, 'repeat'); P.grainCanvas = g;
+  P.paint = $('#paint'); P.pctx = P.paint.getContext('2d');
   const ro = new ResizeObserver(resize); ro.observe($('#stageWrap')); resize();
+  applyVideoStyle();
+}
+function applyVideoStyle() {
+  const v = $('#cam');
+  v.style.opacity = S.camOn && S.settings.showVideo ? S.settings.videoAlpha : 0;
+  v.style.transform = S.settings.mirror ? 'scaleX(-1)' : 'none';
+  $('#paint').style.display = Q().paint && S.settings.paint > 0 ? 'block' : 'none';
 }
 function resize() {
   const r = $('#stageWrap').getBoundingClientRect();
-  P.dpr = Math.min(window.devicePixelRatio || 1, S.mode === 'mobile' ? 1.5 : 2);
-  P.cv.width = Math.max(2, r.width * P.dpr); P.cv.height = Math.max(2, r.height * P.dpr);
-  P.paint.width = Math.max(2, r.width * P.dpr / 2); P.paint.height = Math.max(2, r.height * P.dpr / 2);
-  P.grain = P.ctx.createPattern(P.grainCanvas, 'repeat');
+  P.dpr = Math.min(window.devicePixelRatio || 1, Q().dpr);
+  P.cv.width = Math.max(2, Math.round(r.width * P.dpr)); P.cv.height = Math.max(2, Math.round(r.height * P.dpr));
+  P.paint.width = Math.max(2, Math.round(r.width / 4)); P.paint.height = Math.max(2, Math.round(r.height / 4));
   VIEW.cw = r.width; VIEW.ch = r.height; computeView();
+  scopeResize(); applyVideoStyle();
 }
-function colorFor(target) { const m = /^fx\.(\w+)\./.exec(target); if (m && FXMAP[m[1]]) return FXMAP[m[1]].color; if (target.startsWith('lfo')) return '#c08a2c'; return '#6b4a2f'; }
+function colorFor(target) { const m = /^fx\.(\w+)\./.exec(target); if (m && FXMAP[m[1]]) return FXMAP[m[1]].color; if (target.startsWith('lfo')) return SKIN.c.ochre; return SKIN.c.ink; }
 function blob(ctx, x, y, r, col, a) {
-  const n = 13, pts = [];
+  const n = 11, pts = [];
   for (let i = 0; i < n; i++) { const an = i / n * Math.PI * 2, rr = r * (.7 + Math.random() * .55); pts.push([x + Math.cos(an) * rr, y + Math.sin(an) * rr]); }
   ctx.beginPath();
   for (let i = 0; i <= n; i++) { const p = pts[i % n], q = pts[(i + 1) % n], mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2; if (!i) ctx.moveTo(mx, my); else ctx.quadraticCurveTo(p[0], p[1], mx, my); }
-  ctx.fillStyle = hexA(col, a); ctx.fill(); ctx.lineWidth = 1.2; ctx.strokeStyle = hexA(col, a * 1.8); ctx.stroke();
+  ctx.fillStyle = hexA(col, a); ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = hexA(col, a * 1.8); ctx.stroke();
 }
 function stamp(text, color, hd) { S.stamps.push({ text, color, t: 0, rot: (Math.random() - .5) * .12 }); if (S.stamps.length > 3) S.stamps.shift(); }
 function spark(hd, text) { S.sparks.push({ x: hd.cx, y: hd.cy, text, t: 0, vx: (Math.random() - .5) * 30, col: LOOP_COLORS[Math.floor(Math.random() * 4)] }); if (S.sparks.length > 24) S.sparks.shift(); }
-function draw(dt) {
-  const c = P.ctx, W = P.cv.width, H = P.cv.height, d = P.dpr; P.t += dt;
-  c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
-  c.fillStyle = '#efe4cc'; c.fillRect(0, 0, W, H);
-  const v = TRK.video;
-  if (S.camOn && S.settings.showVideo && v && v.readyState >= 2) {
-    c.save(); c.globalAlpha = S.settings.videoAlpha;
-    if (S.settings.mirror) { c.translate(W, 0); c.scale(-1, 1); }
-    c.drawImage(v, VIEW.ox * d, VIEW.oy * d, VIEW.dw * d, VIEW.dh * d); c.restore();
-    c.globalAlpha = .72; c.globalCompositeOperation = 'saturation'; c.fillStyle = 'hsl(35,25%,50%)'; c.fillRect(0, 0, W, H);
-    c.globalAlpha = .45; c.globalCompositeOperation = 'multiply'; c.fillStyle = '#e8d3a6'; c.fillRect(0, 0, W, H);
-    c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
+function paintTick(dt) {
+  const pc = P.pctx, pw = P.paint.width, ph = P.paint.height, sx = pw / VIEW.cw;
+  pc.globalCompositeOperation = 'destination-out'; pc.fillStyle = `rgba(0,0,0,${(.02 + (1 - S.settings.paint) * .08) * dt * 20})`; pc.fillRect(0, 0, pw, ph); pc.globalCompositeOperation = 'source-over';
+  for (const r of S.routes) {
+    if (!r.active || r.sm == null) continue; const hd = S.hands[r.hand];
+    const span = Math.max(.05, Math.abs(r.max - r.min)), val = clamp(Math.abs(r.sm - Math.min(r.min, r.max)) / span);
+    if (val < .04 || Math.random() > .5 * S.settings.paint + .15) continue;
+    const R = (12 + 50 * val) * sx;
+    blob(pc, hd.cx * sx + (Math.random() - .5) * R * 1.6, hd.cy * sx + (Math.random() - .5) * R * 1.6, R, colorFor(r.target), .07 + .07 * val);
   }
-  // paint layer
-  const pc = P.pctx, pw = P.paint.width, ph = P.paint.height, ps = pw / W;
-  pc.globalCompositeOperation = 'destination-out'; pc.fillStyle = `rgba(0,0,0,${.006 + (1 - S.settings.paint) * .05})`; pc.fillRect(0, 0, pw, ph); pc.globalCompositeOperation = 'source-over';
-  if (S.settings.paint > 0) {
-    for (const r of S.routes) {
-      if (!r.active) continue; const hd = S.hands[r.hand]; const p = PARAMS[r.target]; const val = p ? clamp(Math.abs(r.sm - (r.min < r.max ? r.min : r.max)) / Math.max(.05, Math.abs(r.max - r.min))) : 0;
-      if (val < .04 || Math.random() > .3 * S.settings.paint + .1) continue;
-      const R = (14 + 55 * val) * d * ps;
-      blob(pc, hd.cx * d * ps + (Math.random() - .5) * R * 1.6, hd.cy * d * ps + (Math.random() - .5) * R * 1.6, R, colorFor(r.target), .05 + .05 * val);
-    }
-    for (const l of S.lfos) if (l.on && l.target && Math.random() < .04 * S.settings.paint) blob(pc, Math.random() * pw, (.75 + Math.random() * .25) * ph, (8 + 20 * Math.abs(l.val)) * d * ps, colorFor(l.target), .05);
-  }
-  c.globalCompositeOperation = 'multiply'; c.drawImage(P.paint, 0, 0, W, H);
-  c.globalAlpha = .35; c.fillStyle = P.grain; c.fillRect(0, 0, W, H); c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
-  const vg = c.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .35, W / 2, H / 2, Math.max(W, H) * .75);
-  vg.addColorStop(0, 'rgba(60,40,20,0)'); vg.addColorStop(1, 'rgba(60,40,20,.45)'); c.fillStyle = vg; c.fillRect(0, 0, W, H);
-  c.scale(d, d);
-  // hands
+  for (const l of S.lfos) if (l.on && l.target && Math.random() < .06 * S.settings.paint) blob(pc, Math.random() * pw, (.75 + Math.random() * .25) * ph, (6 + 14 * Math.abs(l.val)) * sx * 4, colorFor(l.target), .06);
+}
+function draw(dt, now) {
+  const q = Q();
+  if (q.paint && S.settings.paint > 0 && now - PERF.lastPaint > 1000 / q.paintHz) { paintTick((now - PERF.lastPaint) / 1000); PERF.lastPaint = now; }
+  const c = P.ctx, d = P.dpr; P.t += dt;
+  c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, P.cv.width, P.cv.height); c.setTransform(d, 0, 0, d, 0, 0);
   for (const k of ['L', 'R']) {
     const hd = S.hands[k]; if (!hd.present) continue;
-    if (hd.pts && S.settings.showSkeleton) drawHand(c, hd);
-    else if (hd.src === 'ptr') { c.beginPath(); c.arc(hd.cx, hd.cy, hd.f.pinch < .5 ? 16 : 26, 0, 7); c.lineWidth = 3; c.strokeStyle = hd.f.pinch < .5 ? '#a3402f' : 'rgba(59,42,30,.8)'; c.setLineDash([5, 4]); c.stroke(); c.setLineDash([]); }
-    drawLabels(c, hd);
+    if (hd.pts && (S.settings.showSkeleton || hd.src === 'ghost')) drawHand(c, hd);
+    else if (hd.src === 'ptr') { c.beginPath(); c.arc(hd.cx, hd.cy, hd.f.pinch < .5 ? 16 : 26, 0, 7); c.lineWidth = 3; c.strokeStyle = hd.f.pinch < .5 ? SKIN.c.madder : 'rgba(59,42,30,.8)'; c.setLineDash([5, 4]); c.stroke(); c.setLineDash([]); }
+    if (hd.holdFrac > 0) { const x = hd.pts ? hd.pts[9].x : hd.cx, y = hd.pts ? hd.pts[9].y : hd.cy; c.beginPath(); c.arc(x, y, 30, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * hd.holdFrac); c.lineWidth = 5; c.strokeStyle = SKIN.c.madder; c.stroke(); }
+    if (!(k === 'L' && S.mode === 'mobile' && !hd.pts)) drawLabels(c, hd);
   }
-  if (S.hands.L.src === 'pad' && S.hands.L.present) drawLabels(c, Object.assign({}, S.hands.L, { cx: 70, cy: VIEW.ch - 70 }));
-  // sparks
-  for (const s of S.sparks) { s.t += dt; s.y -= 40 * dt; s.x += s.vx * dt; const a = clamp(1 - s.t / 1.6); if (a <= 0) continue; c.globalAlpha = a; c.fillStyle = s.col; c.beginPath(); c.arc(s.x, s.y, 5 + 6 * (1 - a), 0, 7); c.fill(); c.font = '600 22px Caveat, cursive'; c.fillStyle = '#3b2a1e'; c.fillText(s.text, s.x + 10, s.y - 6); }
+  if ((S.hands.L.src === 'pad' || (S.hands.L.src === 'ghost' && S.mode === 'mobile')) && S.hands.L.present) drawLabels(c, Object.assign({}, S.hands.L, { cx: 70, cy: VIEW.ch - 70 }));
+  for (const s of S.sparks) { s.t += dt; s.y -= 40 * dt; s.x += s.vx * dt; const a = clamp(1 - s.t / 1.6); if (a <= 0) continue; c.globalAlpha = a; c.fillStyle = s.col; c.beginPath(); c.arc(s.x, s.y, 5 + 6 * (1 - a), 0, 7); c.fill(); c.font = '600 22px Caveat, cursive'; c.fillStyle = SKIN.c.ink; c.fillText(s.text, s.x + 10, s.y - 6); }
   S.sparks = S.sparks.filter(s => s.t < 1.6); c.globalAlpha = 1;
-  // voice note readout (continuous voices)
-  if (V.cont && V.cont.note) { const hd = S.hands[S.voice.hand]; if (hd.present) { c.font = '700 30px Caveat, cursive'; c.fillStyle = '#a3402f'; c.fillText('♪ ' + V.cont.note, hd.cx + 30, hd.cy + 50); } }
-  drawWheel(c); drawMeter(c);
-  // stamps
+  if (V.cont && V.cont.note) { const hd = S.hands[S.voice.hand]; if (hd.present) { c.font = '700 30px Caveat, cursive'; c.fillStyle = SKIN.c.madder; c.fillText('♪ ' + V.cont.note, hd.cx + 30, hd.cy + 50); } }
+  drawWheel(c);
   for (const s of S.stamps) {
     s.t += dt; const a = clamp(s.t < .15 ? s.t / .15 : 1 - (s.t - .9) / .6); if (a <= 0) continue;
     c.save(); c.globalAlpha = a; c.translate(VIEW.cw / 2, VIEW.ch * .2 + S.stamps.indexOf(s) * 46); c.rotate(s.rot);
     c.font = '34px "IM Fell English SC", Georgia, serif'; const w = c.measureText(s.text).width;
-    c.strokeStyle = s.color; c.lineWidth = 2.5; c.strokeRect(-w / 2 - 14, -30, w + 28, 42); c.fillStyle = hexA(s.color, .1); c.fillRect(-w / 2 - 14, -30, w + 28, 42);
+    c.strokeStyle = s.color; c.lineWidth = 2.5; c.strokeRect(-w / 2 - 14, -30, w + 28, 42); c.fillStyle = 'rgba(239,228,204,.85)'; c.fillRect(-w / 2 - 14, -30, w + 28, 42);
     c.fillStyle = s.color; c.textAlign = 'center'; c.fillText(s.text, 0, 2); c.restore();
   }
   S.stamps = S.stamps.filter(s => s.t < 1.5);
-  if (S.frozen) { c.font = '28px "IM Fell English SC", serif'; c.fillStyle = '#2f4a6b'; c.textAlign = 'right'; c.fillText('❄ frozen', VIEW.cw - 14, VIEW.ch - 34); c.textAlign = 'left'; }
+  if (S.frozen) { c.font = '28px "IM Fell English SC", serif'; c.fillStyle = SKIN.c.indigo; c.textAlign = 'right'; c.fillText('❄ frozen', VIEW.cw - 14, VIEW.ch - 14); c.textAlign = 'left'; }
+  if (TUT.active) tutDrawOverlay(c, dt);
 }
 function drawHand(c, hd) {
-  const pts = hd.pts, t = P.t;
+  const pts = hd.pts, t = P.t, ghost = hd.src === 'ghost';
   c.lineCap = 'round';
   for (let pass = 0; pass < 2; pass++) {
-    c.lineWidth = pass ? 2.2 : 7; c.strokeStyle = pass ? 'rgba(59,42,30,.9)' : 'rgba(59,42,30,.18)';
+    c.lineWidth = pass ? 2.4 : 8; c.strokeStyle = pass ? (ghost ? hexA(SKIN.c.indigo, .9) : 'rgba(59,42,30,.9)') : (ghost ? hexA(SKIN.c.indigo, .15) : 'rgba(59,42,30,.18)');
     CONN.forEach(([a, b], i) => {
       const p = pts[a], q = pts[b], mx = (p.x + q.x) / 2, my = (p.y + q.y) / 2, nx = -(q.y - p.y), ny = q.x - p.x, L2 = Math.hypot(nx, ny) || 1, w = Math.sin(t * 1.3 + i * 1.7) * 2.2 + (pass ? .8 : 0);
       c.beginPath(); c.moveTo(p.x, p.y); c.quadraticCurveTo(mx + nx / L2 * w, my + ny / L2 * w, q.x, q.y); c.stroke();
     });
   }
-  for (let i = 0; i < 21; i++) { const p = pts[i]; c.beginPath(); c.arc(p.x, p.y, [4, 8, 12, 16, 20].includes(i) ? 4.5 : 3, 0, 7); c.fillStyle = [4, 8].includes(i) ? '#a3402f' : '#c08a2c'; c.fill(); c.lineWidth = 1; c.strokeStyle = '#3b2a1e'; c.stroke(); }
-  // thread between thumb & index (the loom)
+  for (let i = 0; i < 21; i++) { const p = pts[i]; c.beginPath(); c.arc(p.x, p.y, [4, 8, 12, 16, 20].includes(i) ? 4.5 : 3, 0, 7); c.fillStyle = [4, 8].includes(i) ? SKIN.c.madder : SKIN.c.ochre; c.fill(); c.lineWidth = 1; c.strokeStyle = SKIN.c.ink; c.stroke(); }
   const a = pts[4], b = pts[8], len = Math.hypot(b.x - a.x, b.y - a.y), sag = Math.min(30, len * .18);
   c.beginPath(); c.moveTo(a.x, a.y); c.quadraticCurveTo((a.x + b.x) / 2, (a.y + b.y) / 2 + sag, b.x, b.y);
-  c.setLineDash([7, 4]); c.lineWidth = 3; c.strokeStyle = hd.gate ? '#a3402f' : 'rgba(163,64,47,.75)'; c.stroke(); c.setLineDash([]);
-  c.beginPath(); c.arc((a.x + b.x) / 2, (a.y + b.y) / 2 + sag / 2, 5, 0, 7); c.fillStyle = '#c08a2c'; c.fill();
-  // tri to wrist (like the reel)
+  c.setLineDash([7, 4]); c.lineWidth = 3; c.strokeStyle = hd.gate ? SKIN.c.madder : hexA(SKIN.c.madder, .75); c.stroke(); c.setLineDash([]);
+  c.beginPath(); c.arc((a.x + b.x) / 2, (a.y + b.y) / 2 + sag / 2, 5, 0, 7); c.fillStyle = SKIN.c.ochre; c.fill();
   c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(pts[0].x, pts[0].y); c.lineTo(b.x, b.y); c.strokeStyle = 'rgba(239,228,204,.55)'; c.lineWidth = 1.5; c.stroke();
+  if (ghost) { c.font = '700 22px Caveat, cursive'; c.fillStyle = SKIN.c.indigo; c.fillText(hd.id === 'L' ? 'left' : 'right', pts[0].x - 18, pts[0].y + 30); }
 }
 function drawLabels(c, hd) {
   const rs = S.routes.filter(r => r.on && r.hand === hd.id && PARAMS[r.target]);
@@ -1087,36 +1382,349 @@ function drawLabels(c, hd) {
   c.font = '600 22px Caveat, cursive';
   rs.slice(0, 4).forEach((r, i) => {
     const p = PARAMS[r.target], col = colorFor(r.target), yy = y + i * 30;
-    const tw = c.measureText(shortLabel(r.target)).width + 34; c.fillStyle = 'rgba(239,228,204,.78)'; c.fillRect(x - 4, yy - 18, tw, 26);
+    const tw = c.measureText(shortLabel(r.target)).width + 34; c.fillStyle = 'rgba(239,228,204,.8)'; c.fillRect(x - 4, yy - 18, tw, 26);
     c.beginPath(); c.arc(x + 10, yy - 5, 9, 0, 7); c.strokeStyle = 'rgba(59,42,30,.35)'; c.lineWidth = 3; c.stroke();
     c.beginPath(); c.arc(x + 10, yy - 5, 9, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * p.cur); c.strokeStyle = col; c.lineWidth = 3.5; c.stroke();
-    c.fillStyle = col; c.fillText(shortLabel(r.target), x + 25, yy + 2);
+    c.fillStyle = col; c.fillText(shortLabel(r.target) + (r.held ? ' ⏸' : ''), x + 25, yy + 2);
   });
-  if (hd.stablePose && hd.stablePose !== 'none' && hd.stablePose !== 'other' && hd.pts) { c.font = '18px Caveat, cursive'; c.fillStyle = 'rgba(59,42,30,.7)'; c.fillText(POSE_LABEL[hd.stablePose] || '', hd.pts[0].x - 20, hd.pts[0].y + 26); }
+  if (hd.stablePose && !['none', 'other', 'open'].includes(hd.stablePose) && hd.pts) { c.font = '18px Caveat, cursive'; c.fillStyle = 'rgba(59,42,30,.7)'; c.fillText(POSE_LABEL[hd.stablePose] || '', hd.pts[0].x - 20, hd.pts[0].y + 26); }
 }
 function shortLabel(id) { const p = PARAMS[id]; return p ? p.label.replace(/^(\w+) (\w+)$/, (m, a, b) => a + ' · ' + b) : id; }
 function drawWheel(c) {
-  const R = 34, cx = VIEW.cw - R - 18, cy = R + 18;
+  const R = 30, cx = VIEW.cw - R - 16, cy = R + 16;
   const ph = L.base ? (((Tone.now() - L.T0) % L.base) + L.base) % L.base / L.base : 0;
   c.save(); c.translate(cx, cy);
   c.globalAlpha = L.base || L.rec ? 1 : .55;
-  c.fillStyle = 'rgba(239,228,204,.8)'; c.beginPath(); c.arc(0, 0, R + 8, 0, 7); c.fill();
+  c.fillStyle = 'rgba(239,228,204,.85)'; c.beginPath(); c.arc(0, 0, R + 8, 0, 7); c.fill();
   L.layers.forEach((ly, i) => { c.beginPath(); c.arc(0, 0, R + 4 - i * 2.2, -Math.PI / 2, Math.PI * 1.5); c.strokeStyle = ly.muted ? 'rgba(59,42,30,.15)' : ly.color; c.lineWidth = 2; c.stroke(); });
   c.rotate(ph * Math.PI * 2);
-  c.strokeStyle = '#3b2a1e'; c.lineWidth = 2.5; c.beginPath(); c.arc(0, 0, R - 6, 0, 7); c.stroke();
+  c.strokeStyle = SKIN.c.ink; c.lineWidth = 2.5; c.beginPath(); c.arc(0, 0, R - 6, 0, 7); c.stroke();
   for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; c.beginPath(); c.moveTo(0, 0); c.lineTo(Math.cos(a) * (R - 6), Math.sin(a) * (R - 6)); c.lineWidth = 1.5; c.stroke(); }
-  c.beginPath(); c.arc(0, -(R - 6), 4, 0, 7); c.fillStyle = '#a3402f'; c.fill();
+  c.beginPath(); c.arc(0, -(R - 6), 4, 0, 7); c.fillStyle = SKIN.c.madder; c.fill();
   c.restore();
-  c.beginPath(); c.arc(cx, cy, 5, 0, 7); c.fillStyle = L.rec ? (Math.sin(P.t * 8) > 0 ? '#a3402f' : '#efe4cc') : '#c08a2c'; c.fill();
-  c.font = '600 18px Caveat, cursive'; c.fillStyle = '#3b2a1e'; c.textAlign = 'center';
-  c.fillText(L.rec ? 'recording' : L.layers.length ? L.layers.length + ' layer' + (L.layers.length > 1 ? 's' : '') : 'loom idle', cx, cy + R + 24); c.textAlign = 'left';
+  c.beginPath(); c.arc(cx, cy, 5, 0, 7); c.fillStyle = L.rec ? (Math.sin(P.t * 8) > 0 ? SKIN.c.madder : '#efe4cc') : SKIN.c.ochre; c.fill();
+  c.font = '600 18px Caveat, cursive'; c.fillStyle = SKIN.c.ink; c.textAlign = 'center';
+  c.fillText(L.rec ? 'recording' : L.layers.length ? L.layers.length + ' layer' + (L.layers.length > 1 ? 's' : '') : 'loom idle', cx, cy + R + 22); c.textAlign = 'left';
 }
-function drawMeter(c) {
-  let db = -60; try { db = A.meter.getValue(); if (Array.isArray(db)) db = Math.max(...db); } catch (e) {}
-  const v = clamp((db + 54) / 54), x = 14, y = VIEW.ch - 20, w = 120;
-  c.fillStyle = 'rgba(239,228,204,.7)'; c.fillRect(x - 4, y - 10, w + 8, 16);
-  c.fillStyle = v > .92 ? '#a3402f' : '#3b2a1e'; c.fillRect(x, y - 6, w * v, 8);
-  c.font = '16px Caveat, cursive'; c.fillText(S.micOn ? '🎙 live' : (S.sandbox ? 'preview' : 'mic off'), x + w + 10, y + 2);
+
+/* =====================================================================
+   SCOPE — spectrogram, in/out waveform, thread seismograph, meters
+   ===================================================================== */
+const SC = { cv: null, ctx: null, spec: null, sctx: null, an: null, anIn: null, fbuf: null, tin: null, tout: null, hist: {}, lut: null, peak: { in: -90, out: -90, inT: 0, outT: 0 }, clipT: 0 };
+function setupScope() {
+  SC.cv = $('#scope'); SC.ctx = SC.cv.getContext('2d');
+  SC.spec = document.createElement('canvas'); SC.sctx = SC.spec.getContext('2d');
+  const raw = Tone.getContext();
+  SC.an = raw.createAnalyser(); SC.an.fftSize = 2048; SC.an.smoothingTimeConstant = .55;
+  SC.anIn = raw.createAnalyser(); SC.anIn.fftSize = 1024;
+  Tone.connect(A.limiter, SC.an); A.scopeIn = SC.anIn; Tone.connect(A.vocalBus, SC.anIn);
+  SC.fbuf = new Float32Array(SC.an.frequencyBinCount); SC.tout = new Float32Array(1024); SC.tin = new Float32Array(1024);
+  buildLUT(); scopeResize();
+}
+function buildLUT() {
+  const stops = [[0, '#efe4cc'], [.35, SKIN.c.ochre], [.65, SKIN.c.madder], [1, SKIN.c.ink]].map(([t, h]) => [t, parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]);
+  SC.lut = new Uint8ClampedArray(256 * 3);
+  for (let i = 0; i < 256; i++) { const t = i / 255; let k = 0; while (k < stops.length - 2 && t > stops[k + 1][0]) k++; const [t0, r0, g0, b0] = stops[k], [t1, r1, g1, b1] = stops[k + 1], u = clamp((t - t0) / (t1 - t0)); SC.lut[i * 3] = lerp(r0, r1, u); SC.lut[i * 3 + 1] = lerp(g0, g1, u); SC.lut[i * 3 + 2] = lerp(b0, b1, u); }
+}
+function scopeResize() {
+  if (!SC.cv) return; const r = SC.cv.getBoundingClientRect(); const d = Math.min(window.devicePixelRatio || 1, 1.5);
+  SC.cv.width = Math.max(2, Math.round(r.width * d)); SC.cv.height = Math.max(2, Math.round(r.height * d)); SC.d = d;
+  SC.spec.width = Math.max(2, Math.round(SC.cv.width * .6)); SC.spec.height = Math.max(2, Math.round(SC.cv.height - 26 * d));
+  SC.sctx.fillStyle = '#efe4cc'; SC.sctx.fillRect(0, 0, SC.spec.width, SC.spec.height);
+}
+function scopeTick(now) {
+  if (!SC.cv || !S.settings.scope || SC.cv.offsetParent === null) return;
+  const q = Q(); if (now - PERF.lastScope < 1000 / q.scopeHz) return; PERF.lastScope = now;
+  const c = SC.ctx, W = SC.cv.width, H = SC.cv.height, d = SC.d, trH = 26 * d, topH = H - trH;
+  const spW = q.spectro ? SC.spec.width : 0;
+  c.fillStyle = '#efe4cc'; c.fillRect(0, 0, W, H);
+  // spectrogram (log frequency 60 Hz – 12 kHz), scrolling right-to-left
+  if (q.spectro) {
+    SC.an.getFloatFrequencyData(SC.fbuf);
+    const s = SC.sctx, sw = SC.spec.width, sh = SC.spec.height, step = Math.max(1, Math.round(2 * d));
+    s.drawImage(SC.spec, -step, 0);
+    const col = s.createImageData(step, sh), nyq = Tone.getContext().sampleRate / 2, N = SC.fbuf.length;
+    for (let y = 0; y < sh; y++) {
+      const f = 60 * Math.pow(12000 / 60, 1 - y / sh), bin = Math.min(N - 1, Math.round(f / nyq * N));
+      const v = clamp((SC.fbuf[bin] + 95) / 70), li = Math.round(v * 255) * 3;
+      for (let x = 0; x < step; x++) { const o = (y * step + x) * 4; col.data[o] = SC.lut[li]; col.data[o + 1] = SC.lut[li + 1]; col.data[o + 2] = SC.lut[li + 2]; col.data[o + 3] = 255; }
+    }
+    s.putImageData(col, sw - step, 0);
+    c.drawImage(SC.spec, 0, 0, sw, topH);
+    c.font = `${14 * d}px Caveat, cursive`; c.fillStyle = 'rgba(59,42,30,.75)';
+    c.fillText('spectrum of what you hear', 6 * d, 14 * d);
+    c.textAlign = 'right'; [[100, '100 Hz'], [1000, '1k'], [5000, '5k']].forEach(([f, l]) => { const y = (1 - Math.log(f / 60) / Math.log(200)) * topH; c.fillText(l, spW - 4 * d, y + 4 * d); }); c.textAlign = 'left';
+  }
+  // waveforms: dry in (ink) vs processed out (madder)
+  const wx = spW + 6 * d, ww = W - wx - 54 * d, mid = topH / 2;
+  SC.anIn.getFloatTimeDomainData(SC.tin); SC.an.getFloatTimeDomainData(SC.tout);
+  const wave = (buf, col, lw, gain) => { c.beginPath(); for (let i = 0; i < 512; i++) { const x = wx + i / 511 * ww, y = mid - clamp(buf[i] * gain, -1, 1) * mid * .9; i ? c.lineTo(x, y) : c.moveTo(x, y); } c.strokeStyle = col; c.lineWidth = lw; c.stroke(); };
+  c.strokeStyle = 'rgba(59,42,30,.15)'; c.lineWidth = 1; c.beginPath(); c.moveTo(wx, mid); c.lineTo(wx + ww, mid); c.stroke();
+  wave(SC.tin, 'rgba(59,42,30,.45)', 1.2 * d, 2.5); wave(SC.tout, SKIN.c.madder, 1.8 * d, 2.5);
+  c.font = `${14 * d}px Caveat, cursive`; c.fillStyle = 'rgba(59,42,30,.75)'; const l1 = 'in (dry)'; c.fillText(l1, wx + 4 * d, 14 * d); c.fillStyle = SKIN.c.madder; c.fillText('out (through the rack)', wx + 12 * d + c.measureText(l1).width, 14 * d);
+  // meters with peak hold and clip light
+  const meter = (x, db, key, label) => {
+    const v = clamp((db + 60) / 60), pk = SC.peak;
+    if (db > pk[key] || now - pk[key + 'T'] > 1200) { pk[key] = db; pk[key + 'T'] = now; }
+    c.fillStyle = 'rgba(59,42,30,.12)'; c.fillRect(x, 6 * d, 14 * d, topH - 12 * d);
+    const hh = (topH - 12 * d) * v; c.fillStyle = db > -6 ? SKIN.c.madder : db > -18 ? SKIN.c.ochre : SKIN.c.sage; c.fillRect(x, topH - 6 * d - hh, 14 * d, hh);
+    const py = topH - 6 * d - (topH - 12 * d) * clamp((pk[key] + 60) / 60); c.fillStyle = SKIN.c.ink; c.fillRect(x, py, 14 * d, 2 * d);
+    c.font = `${12 * d}px Caveat, cursive`; c.fillText(label, x, topH - 1 * d);
+  };
+  let din = -90, dout = -90; try { din = A.inMeter.getValue(); dout = A.meter.getValue(); if (Array.isArray(din)) din = Math.max(...din); if (Array.isArray(dout)) dout = Math.max(...dout); } catch (e) {}
+  meter(W - 48 * d, din, 'in', 'in'); meter(W - 26 * d, dout, 'out', 'out');
+  if (dout > -.8) SC.clipT = now;
+  if (now - SC.clipT < 800) { c.fillStyle = SKIN.c.madder; c.beginPath(); c.arc(W - 19 * d, 4 * d + 2, 3.5 * d, 0, 7); c.fill(); }
+  let red = 0; try { red = A.limiter.reduction; } catch (e) {}
+  if (red < -1) { c.font = `${12 * d}px Caveat, cursive`; c.fillStyle = SKIN.c.ink; c.fillText(`lim ${red.toFixed(0)}dB`, W - 54 * d, 12 * d); }
+  // thread seismograph: every moving knob drawn as a line over the last few seconds
+  const ty = topH; c.fillStyle = '#e6d7b8'; c.fillRect(0, ty, W, trH);
+  const live = {}; S.routes.forEach(r => { if (r.on && PARAMS[r.target]) live[r.target] = 1; }); S.lfos.forEach(l => { if (l.on && l.target && PARAMS[l.target]) live[l.target] = 1; });
+  let lx = 6 * d;
+  for (const id in live) {
+    const hst = SC.hist[id] = SC.hist[id] || []; hst.push(PARAMS[id].cur); if (hst.length > 160) hst.shift();
+    c.beginPath(); hst.forEach((v, i) => { const x = W * (1 - (hst.length - 1 - i) / 159), y = ty + trH - 3 * d - v * (trH - 6 * d); i ? c.lineTo(x, y) : c.moveTo(x, y); });
+    c.strokeStyle = colorFor(id); c.lineWidth = 1.6 * d; c.stroke();
+    c.font = `${13 * d}px Caveat, cursive`; c.fillStyle = colorFor(id); const lbl = shortLabel(id); c.fillText(lbl, lx, ty + 12 * d); lx += c.measureText(lbl).width + 10 * d;
+  }
+  for (const id in SC.hist) if (!live[id]) delete SC.hist[id];
+  if (!Object.keys(live).length) { c.font = `${13 * d}px Caveat, cursive`; c.fillStyle = 'rgba(59,42,30,.6)'; c.fillText('threads you move show up here', 6 * d, ty + 15 * d); }
+}
+
+/* =====================================================================
+   SKIN — palette (and optional album art) that colours the whole loom
+   ===================================================================== */
+const DEFAULT_COLORS = { ink: '#3b2a1e', paper: '#efe4cc', madder: '#a3402f', indigo: '#2f4a6b', ochre: '#c08a2c', sage: '#6f8a5a', plum: '#7a4a6b', rust: '#b5652b' };
+const DEFAULT_FX_COLORS = Object.fromEntries(FX.map(f => [f.id, f.color]));
+const SKIN = { c: Object.assign({}, DEFAULT_COLORS), art: null };
+const rgbHex = (r, g, b) => '#' + [r, g, b].map(v => Math.round(clamp(v, 0, 255)).toString(16).padStart(2, '0')).join('');
+const hexRgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const mixHex = (a, b, t) => { const x = hexRgb(a), y = hexRgb(b); return rgbHex(lerp(x[0], y[0], t), lerp(x[1], y[1], t), lerp(x[2], y[2], t)); };
+function applySkin(sk) {
+  SKIN.c = Object.assign({}, DEFAULT_COLORS, (sk && sk.c) || {}); SKIN.art = (sk && sk.art) || null;
+  const root = document.documentElement.style;
+  for (const k of ['ink', 'paper', 'madder', 'indigo', 'ochre', 'sage', 'plum', 'rust']) root.setProperty('--' + k, SKIN.c[k]);
+  root.setProperty('--paper2', mixHex(SKIN.c.paper, SKIN.c.ink, .07)); root.setProperty('--paper3', mixHex(SKIN.c.paper, SKIN.c.ink, .16));
+  root.setProperty('--ink2', mixHex(SKIN.c.ink, SKIN.c.paper, .18)); root.setProperty('--faint', mixHex(SKIN.c.ink, SKIN.c.paper, .45));
+  if (sk && sk.c) { const acc = ['madder', 'indigo', 'ochre', 'sage', 'plum', 'rust']; FX.forEach((f, i) => f.color = mixHex(SKIN.c[acc[i % 6]], i >= 6 ? SKIN.c.ink : SKIN.c.paper, i >= 6 ? .2 : 0)); }
+  else FX.forEach(f => f.color = DEFAULT_FX_COLORS[f.id]);
+  LOOP_COLORS.splice(0, 8, SKIN.c.madder, SKIN.c.indigo, SKIN.c.ochre, SKIN.c.sage, SKIN.c.plum, SKIN.c.rust, mixHex(SKIN.c.indigo, SKIN.c.sage, .5), mixHex(SKIN.c.madder, SKIN.c.plum, .5));
+  document.querySelectorAll('.artThumb').forEach(el => { el.style.backgroundImage = SKIN.art ? `url(${SKIN.art})` : ''; el.style.display = SKIN.art ? 'block' : 'none'; });
+  if (SC.lut) buildLUT();
+}
+async function skinFromImage(file) {
+  const bmp = await createImageBitmap(file);
+  const cv = document.createElement('canvas'); cv.width = cv.height = 64; const x = cv.getContext('2d'); x.drawImage(bmp, 0, 0, 64, 64);
+  const px = x.getImageData(0, 0, 64, 64).data, bins = new Map();
+  for (let i = 0; i < px.length; i += 4) { const k = (px[i] >> 4) << 8 | (px[i + 1] >> 4) << 4 | (px[i + 2] >> 4); const b = bins.get(k) || { n: 0, r: 0, g: 0, b: 0 }; b.n++; b.r += px[i]; b.g += px[i + 1]; b.b += px[i + 2]; bins.set(k, b); }
+  const cols = [...bins.values()].map(b => { const r = b.r / b.n, g = b.g / b.n, bl = b.b / b.n, mx = Math.max(r, g, bl), mn = Math.min(r, g, bl); return { r, g, b: bl, n: b.n, lum: .299 * r + .587 * g + .114 * bl, sat: mx ? (mx - mn) / mx : 0 }; }).sort((a, b) => b.n - a.n).slice(0, 60);
+  const hx = c => rgbHex(c.r, c.g, c.b);
+  const dark = [...cols].sort((a, b) => a.lum - b.lum)[0], light = [...cols].sort((a, b) => b.lum - a.lum)[0];
+  const ink = mixHex(hx(dark), '#1a120c', dark.lum > 60 ? .6 : .25), paper = mixHex(hx(light), '#efe4cc', .55);
+  const acc = []; const dist = (a, b) => Math.hypot(a.r - b.r, a.g - b.g, a.b - b.b);
+  for (const c of [...cols].filter(c => c.lum > 40 && c.lum < 215).sort((a, b) => b.sat * Math.sqrt(b.n) - a.sat * Math.sqrt(a.n))) { if (acc.every(a => dist(a, c) > 60)) acc.push(c); if (acc.length >= 6) break; }
+  const names = ['madder', 'indigo', 'ochre', 'sage', 'plum', 'rust'], c = { ink, paper };
+  names.forEach((n, i) => c[n] = acc[i] ? mixHex(hx(acc[i]), ink, .12) : DEFAULT_COLORS[n]);
+  const t = document.createElement('canvas'); t.width = t.height = 220; t.getContext('2d').drawImage(bmp, 0, 0, 220, 220);
+  const sk = { c, art: t.toDataURL('image/jpeg', .8) };
+  store.set('skin', sk); applySkin(sk); renderPanelSoon(); toast('The loom now wears the album colours');
+}
+
+/* =====================================================================
+   GUIDE — a walkthrough with ghost hands that actually drive the engine
+   ===================================================================== */
+const TUT = { active: false, i: 0, t: 0, tryMode: false, auto: false, saved: null, fired: {}, tryStat: null, madeLayers: 0 };
+const osc = (t, per, lo = 0, hi = 1, ph = 0) => lerp(lo, hi, .5 - .5 * Math.cos((t / per + ph) * Math.PI * 2));
+function ghostPts(id, g) {
+  if (MOB()) g = Object.assign({}, g, { y: .42 + g.y * .5, x: .5 });
+  const cw = VIEW.cw, ch = VIEW.ch, s = (g.s || .11) * Math.min(cw, ch) * (S.mode === 'mobile' ? 1.3 : 1);
+  const cx = g.x * cw, cy = (1 - g.y) * ch, sign = id === 'R' ? -1 : 1;
+  const W = { x: cx, y: cy + s }, P = new Array(21);
+  P[0] = W;
+  const curl = Array.isArray(g.curl) ? g.curl : [g.curl || 0, g.curl || 0, g.curl || 0, g.curl || 0];
+  const base = [.55, .18, -.18, -.5], lift = [.02, .08, .05, -.06], fan = [-.12, -.04, .05, .15], lens = [[.62, .38, .3], [.68, .42, .32], [.64, .4, .3], [.5, .3, .25]];
+  for (let k = 0; k < 4; k++) {
+    let x = cx + sign * base[k] * s, y = cy - .35 * s - lift[k] * s; const a = sign * fan[k];
+    P[5 + 4 * k] = { x, y };
+    for (let j = 0; j < 3; j++) { const l = lens[k][j] * s * (1 - curl[k] * [.45, 1.2, 1.5][j]); x += Math.sin(a) * l; y -= Math.cos(a) * l; P[6 + 4 * k + j] = { x, y }; }
+  }
+  const T = (dx, dy) => ({ x: W.x + sign * dx * s, y: W.y + dy * s });
+  P[1] = T(.35, -.25); P[2] = T(.68, -.55);
+  let ip = T(.92, -.8), tip = T(1.1, -1.02);
+  if (g.thumbUp) { ip = { x: P[2].x, y: P[2].y - .45 * s }; tip = { x: P[2].x, y: P[2].y - .85 * s }; }
+  else if (g.fist) { ip = T(.6, -.75); tip = T(.3, -.82); }
+  const pinch = g.pinch == null ? 1 : g.pinch;
+  if (pinch < 1 && !g.thumbUp && !g.fist) { const it = P[8]; tip = { x: lerp(it.x + sign * .05 * s, tip.x, pinch), y: lerp(it.y + .06 * s, tip.y, pinch) }; ip = { x: lerp((P[2].x + tip.x) / 2, ip.x, pinch), y: lerp((P[2].y + tip.y) / 2, ip.y, pinch) }; }
+  P[3] = ip; P[4] = tip;
+  const r = g.roll || 0, cr = Math.cos(r), sr = Math.sin(r);
+  return P.map(p => ({ x: W.x + (p.x - W.x) * cr - (p.y - W.y) * sr, y: W.y + (p.x - W.x) * sr + (p.y - W.y) * cr }));
+}
+function ghostApply(id, g) {
+  const hd = S.hands[id], dot = $('#pad .dot');
+  if (!g) { if (hd.src === 'ghost') { hd.present = false; hd.src = null; hd.holdFrac = 0; hd.cand = hd.stablePose = 'none'; if (id === 'L' && MOB()) { dot.style.display = 'none'; dot.classList.remove('ghostDot'); } } return; }
+  if (id === 'L' && MOB()) {
+    // on a phone the left hand is the touch pad: animate a ghost thumb on it
+    const px = clamp(.5 + (g.roll || 0) / 1.4), py = g.pinch == null ? .5 : clamp(g.pinch);
+    hd.f.x = px; hd.f.y = py; hd.f.pinch = py; hd.f.open = py; hd.f.roll = px; hd.f.depth = .5; hd.pinchRaw = 1;
+    hd.present = true; hd.src = 'ghost'; hd.pts = null; hd.lastSeen = performance.now(); hd.cand = hd.stablePose = 'open'; hd.holdFrac = 0;
+    dot.classList.add('ghostDot'); dot.style.display = 'block'; dot.style.left = (px * 100) + '%'; dot.style.top = ((1 - py) * 100) + '%';
+    return;
+  }
+  const pts = ghostPts(id, g), curl = Array.isArray(g.curl) ? g.curl : [g.curl || 0, g.curl || 0, g.curl || 0, g.curl || 0];
+  const pinch = g.fist || g.thumbUp ? .1 : (g.pinch == null ? 1 : g.pinch);
+  const c = [0, 5, 9, 13, 17].reduce((a, i) => ({ x: a.x + pts[i].x / 5, y: a.y + pts[i].y / 5 }), { x: 0, y: 0 });
+  const px = hd.f.x, py = hd.f.y;
+  hd.f.x = clamp(c.x / VIEW.cw); hd.f.y = clamp(1 - c.y / VIEW.ch); hd.f.pinch = pinch; hd.f.open = 1 - curl.reduce((a, b) => a + b, 0) / 4;
+  hd.f.roll = clamp(.5 + (g.roll || 0) / (Math.PI * .9)); hd.f.depth = g.depth == null ? .5 : g.depth;
+  hd.f.speed = lerp(hd.f.speed || 0, clamp(Math.hypot(hd.f.x - px, hd.f.y - py) * 30 / 2.5), .3);
+  hd.pinchRaw = g.fist || g.thumbUp ? 1 : .1 + pinch * 1.1;
+  hd.pts = pts; hd.cx = c.x; hd.cy = c.y; hd.present = true; hd.src = 'ghost'; hd.lastSeen = performance.now();
+  hd.cand = hd.stablePose = g.pose || 'open'; hd.holdFrac = g.hold || 0;
+}
+const MOB = () => S.mode === 'mobile';
+const TUT_STEPS = [
+  { title: 'Two hands, two jobs', preset: 'Save Me', demo: true,
+    text: () => MOB() ? 'Prop the phone up so one hand fits in the picture. That hand <b>plays</b>. Your other thumb rides the <b>pad</b> under the stage, which <b>shapes</b> the sound.' : 'Your <b>left hand shapes</b> the sound and your <b>right hand plays</b> it. Stand back so both hands fit in the picture: waist-up, about 1–2 m from the camera, with light on your hands.',
+    listen: 'The demo singer is standing in for your voice. Turn on 🎙 to use your own.',
+    ghost: t => ({ L: { x: .28 + osc(t, 3, -.03, .03), y: .45 + osc(t, 2.2, -.03, .03), pinch: .9 }, R: { x: .72 + osc(t, 3.4, -.03, .03), y: .45 + osc(t, 2.6, -.03, .03, .3), pinch: .9 } }) },
+  { title: 'The thread', preset: 'Save Me', demo: true, try: { hand: 'L', feat: 'pinch' },
+    text: () => MOB() ? 'Slide your thumb <b>up the pad</b> to bring in the harmonies. Down lets them go.' : 'Spread your <b>left thumb and index finger</b> apart. The red stitched <b>thread</b> between them is a knob: the wider you spread, the more <b>harmony</b>.',
+    listen: 'Listen for two more voices blooming above and below the singer.',
+    ghost: t => ({ L: { x: .3, y: .48, pinch: osc(t, 4.5, .05, 1), curl: [0, .1, .25, .35] } }) },
+  { title: 'OK to shake', preset: 'Save Me', demo: true, try: { hand: 'R', feat: 'pinch' },
+    text: () => 'Touch your <b>right thumb to your index</b> (an OK sign) to bring in the <b>tremolo</b>. Open the hand and it eases away.',
+    listen: 'The voice starts to flutter: the closer the pinch, the deeper the shake.',
+    ghost: t => ({ R: { x: .7, y: .5, pinch: osc(t, 4, 1, .02), pose: 'ok' } }) },
+  { title: 'Height is speed', preset: 'Save Me', demo: true, try: { hand: 'R', feat: 'y' },
+    text: () => 'Keep the OK pinch and <b>raise or lower</b> your right hand. Higher is a faster flutter, lower is a slow wobble.',
+    listen: 'Watch the red tick on the hand label, and the line it draws in the strip at the bottom.',
+    ghost: t => ({ R: { x: .7, y: osc(t, 5, .25, .78), pinch: .04, pose: 'ok' } }) },
+  { title: 'Letting go', preset: 'Save Me', demo: true,
+    text: () => 'Drop a hand out of view and its knobs <b>glide home</b>. A thread can be set to <b>hold</b> instead: in Canyon Echo the echo time stays where you leave it.',
+    listen: 'The harmonies fade back to where the Rack sets them.',
+    ghost: t => { const k = t % 6; return { L: k < 3 ? { x: .3, y: .5, pinch: 1 } : null }; } },
+  { title: 'Pluck and strum', preset: 'Kalimba Rain', demo: false, try: { hand: 'R', feat: 'gate' },
+    text: () => 'Some presets give you an instrument. <b>Pinch</b> with your right hand to pluck. <b>Height picks the note</b>, and dragging up or down while pinched <b>strums</b>.',
+    listen: 'Kalimba notes in key, every one landing in the echo.',
+    ghost: t => { const k = t % 6; const y = k < 3 ? .3 + .15 * Math.floor(k) : lerp(.75, .25, (k - 3) / 2.5); const pinched = k < 3 ? (k % 1) > .45 : k < 5.5; return { R: { x: .7, y, pinch: pinched ? .03 : .9 } }; } },
+  { title: 'Tilt, open, reach', preset: 'Choir Loft', demo: true, try: { hand: 'L', feat: 'roll' },
+    text: () => MOB() ? '<b>Opening</b> your hand fills the loft with voices. The pad\'s left-right acts as a <b>tilt</b> dial.' : '<b>Opening</b> your right hand fills the loft with voices. <b>Tilting</b> your left hand like a dial shimmers the chorus. How <b>close</b> a hand is to the camera can be a knob too.',
+    listen: 'The choir swells as the right hand opens.',
+    ghost: t => ({ L: { x: .3, y: .5, roll: osc(t, 4, -.7, .7), pinch: .9 }, R: { x: .7, y: .5, curl: osc(t, 5, .9, 0), pinch: .9 } }) },
+  { title: 'Signs weave loops', preset: 'Save Me', demo: true, loop: true,
+    text: () => MOB() ? 'Hold a <b>thumbs-up 👍</b> until the ring fills to start recording. Do it again to stop: the layer loops on the wheel (top right). <b>✌</b> undoes it.' : 'Hold a <b>left fist ✊</b> until the ring fills to start recording. Fist again to stop: the layer loops on the spinning wheel (top right). <b>✌ peace</b> undoes it. While a hand holds a sign, its knobs <b>freeze</b>, so the sign never jolts the sound.',
+    listen: 'After the second sign you\'ll hear the phrase come round again under the live singer.',
+    ghost: t => {
+      const id = MOB() ? 'R' : 'L', x = id === 'L' ? .3 : .7;
+      const sign = MOB() ? { thumbUp: true, curl: 1, pose: 'thumb' } : { fist: true, curl: 1, pose: 'fist' };
+      if (t < 1) return { [id]: { x, y: .5, pinch: .9 } };
+      if (t < 1.8) return { [id]: Object.assign({ x, y: .5, hold: (t - 1) / .8 }, sign) };
+      if (t < 5.6) return { [id]: { x, y: .5 + .05 * Math.sin(t * 2), pinch: osc(t, 2, .2, 1) } };
+      if (t < 6.4) return { [id]: Object.assign({ x, y: .5, hold: (t - 5.6) / .8 }, sign) };
+      return { [id]: { x, y: .5, pinch: .9 } };
+    },
+    events: [[1.8, 'loop.rec'], [6.4, 'loop.rec']] },
+  { title: 'Weather & the strip', preset: 'Wild Weather', demo: true,
+    text: () => '<b>Weather</b> drifts knobs on its own while your hands are busy. The strip at the bottom shows the <b>spectrum</b> of what you hear, your voice <b>in vs. out</b> of the rack, and a line for <b>every knob that\'s moving</b>.',
+    listen: 'Slow sweeps and gusts. Nobody is touching anything.',
+    ghost: t => ({}) },
+  { title: 'Weave your own', preset: null, demo: false, final: true,
+    text: () => (MOB() ? 'Open <b>☰</b> for the Rack, Threads and Loops. ' : 'The <b>Threads</b> tab ties any part of a hand to any knob. The <b>Rack</b> switches effects on and off (an effect that\'s off uses no CPU). <b>✎ Save</b> keeps your weave. Keys: <b>Space</b> loop · <b>Z</b> undo · <b>← →</b> presets · <b>F</b> freeze. ') + 'Put headphones on, turn on 🎙, and play.',
+    listen: 'Open this guide again from <b>? Guide</b> any time.',
+    ghost: t => ({}) }
+];
+function tutOpen(startAt = 0) {
+  if (!S.started) return;
+  if (!TUT.active) TUT.saved = { preset: S.presetName, demo: DEMO.on, ptr: S.pointerHands };
+  TUT.active = true; TUT.auto = false; $('#tut').classList.remove('hidden'); document.body.classList.add('tutoring'); $('#sheet').classList.remove('open');
+  tutGo(startAt);
+}
+function tutClose() {
+  if (!TUT.active) return;
+  TUT.active = false; $('#tut').classList.add('hidden'); document.body.classList.remove('tutoring'); $('#pad .dot').classList.remove('ghostDot');
+  ghostApply('L', null); ghostApply('R', null);
+  tutCleanLoops();
+  const sv = TUT.saved || {};
+  const p = allPresets().find(x => x.name === sv.preset); if (p) applyPreset(p);
+  demoSet(!!sv.demo || (S.sandbox && !S.micOn));
+  store.set('guideSeen', true);
+}
+function tutCleanLoops() { while (TUT.madeLayers > 0 && L.layers.length) { loopUndo(); TUT.madeLayers--; } TUT.madeLayers = 0; if (L.rec) loopUndo(); }
+function tutGo(i) {
+  tutCleanLoops();
+  TUT.i = clamp(i, 0, TUT_STEPS.length - 1); TUT.t = 0; TUT.tryMode = false; TUT.fired = {}; TUT.tryStat = null;
+  const st = TUT_STEPS[TUT.i];
+  if (st.preset) { const p = allPresets().find(x => x.name === st.preset); if (p) applyPreset(p, true); }
+  demoSet(!!st.demo);
+  ghostApply('L', null); ghostApply('R', null);
+  tutRender();
+}
+function tutRender() {
+  const st = TUT_STEPS[TUT.i], el = $('#tut'), n = TUT_STEPS.length;
+  el.innerHTML = '';
+  const body = h('div', { class: 'step-enter' },
+    h('div', { class: 'tutTop' }, h('span', { class: 'tutNum' }, `${TUT.i + 1} / ${n}`),
+      h('span', { class: 'dots' }, ...TUT_STEPS.map((s, k) => h('i', { class: k === TUT.i ? 'on' : k < TUT.i ? 'done' : '', title: s.title, onclick: () => tutGo(k) }))),
+      h('button', { class: 'x', title: 'close guide', onclick: tutClose }, '×')),
+    h('h3', {}, st.title),
+    (() => { const p = h('p', {}); p.innerHTML = st.text(); return p; })(),
+    (() => { const p = h('p', { class: 'listen' }); p.innerHTML = '♪ ' + st.listen; return p; })(),
+    st.try ? h('div', { class: 'tryRow' }, h('button', { class: 'btn' + (TUT.tryMode ? ' dark' : ''), onclick: () => { TUT.tryMode = !TUT.tryMode; TUT.tryStat = { lo: 1, hi: 0, gates: 0, wasGate: false }; if (TUT.tryMode) ghostApply(st.try.hand, null); tutRender(); } }, TUT.tryMode ? '◉ your turn…' : '✋ Try it yourself'), h('span', { class: 'tryMsg', id: 'tryMsg' }, TUT.tryMode ? (S.trackerReady ? 'do what the ghost did' : 'use the mouse, a finger, or the pad') : '')) : null,
+    h('div', { class: 'tutBar' }, h('i', { id: 'tutProg' })),
+    h('div', { class: 'tutNav' },
+      h('button', { class: 'btn', disabled: TUT.i === 0, onclick: () => tutGo(TUT.i - 1) }, '◀'),
+      h('button', { class: 'btn' + (TUT.auto ? ' red' : ''), onclick: () => { TUT.auto = !TUT.auto; TUT.t = 0; tutRender(); } }, TUT.auto ? '❚❚ pause' : '▶ play walkthrough'),
+      st.final ? h('button', { class: 'btn dark', onclick: tutClose }, 'Start playing') : h('button', { class: 'btn dark', onclick: () => tutGo(TUT.i + 1) }, 'Next ▶')));
+  el.append(body);
+}
+const STEP_SECONDS = 11;
+function tutTick(dt) {
+  if (!TUT.active) return;
+  const st = TUT_STEPS[TUT.i]; TUT.t += dt;
+  const g = st.ghost(TUT.t) || {};
+  for (const id of ['L', 'R']) { if (TUT.tryMode && st.try && st.try.hand === id) continue; ghostApply(id, g[id] || null); }
+  if (st.events) for (const [at, act] of st.events) if (TUT.t >= at && !TUT.fired[at]) {
+    TUT.fired[at] = true; const before = L.layers.length; runAction(act); stamp((MOB() ? '👍' : '✊') + ' → ' + ACTIONS[act], SKIN.c.madder);
+    if (act === 'loop.rec' && L.rec === false) setTimeout(() => { if (L.layers.length > before) TUT.madeLayers++; }, 900);
+  }
+  if (TUT.tryMode && st.try) {
+    const hd = S.hands[st.try.hand], ts = TUT.tryStat, msg = $('#tryMsg');
+    if (hd.present && hd.src !== 'ghost') {
+      if (st.try.feat === 'gate') { if (hd.gate && !ts.wasGate) ts.gates++; ts.wasGate = hd.gate; }
+      else { const v = hd.f[st.try.feat]; ts.lo = Math.min(ts.lo, v); ts.hi = Math.max(ts.hi, v); }
+      const ok = st.try.feat === 'gate' ? ts.gates >= 3 : ts.hi - ts.lo > .45;
+      if (msg) msg.textContent = ok ? '✓ that\'s it!' : st.try.feat === 'gate' ? `plucks: ${ts.gates}/3` : `range ${Math.round((ts.hi - ts.lo) * 100)}% (aim for 45%+)`;
+      if (ok && !ts.done) { ts.done = true; stamp('✓ nicely done', SKIN.c.sage); }
+    } else if (msg && !ts.done) msg.textContent = S.trackerReady || S.mode === 'mobile' ? 'waiting for your hand…' : 'use the mouse or a finger on the stage';
+  }
+  const prog = $('#tutProg'); if (prog) prog.style.width = (TUT.auto ? clamp(TUT.t / STEP_SECONDS) * 100 : 0) + '%';
+  if (TUT.auto && !TUT.tryMode && TUT.t > STEP_SECONDS) { if (st.final) TUT.auto = false; else tutGo(TUT.i + 1); TUT.auto = !st.final; if (!st.final) tutRender(); }
+}
+function tutDrawOverlay(c) {
+  if (!TUT_STEPS[TUT.i]) return;
+  if (MOB()) return;
+  c.font = '600 18px Caveat, cursive'; c.fillStyle = hexA(SKIN.c.indigo, .8); c.textAlign = 'right';
+  c.fillText(TUT.tryMode ? 'your turn' : 'ghost hands are showing you', VIEW.cw - 14, VIEW.ch - 12); c.textAlign = 'left';
+}
+function guidePrompt() {
+  if (store.get('guideSeen', false)) return;
+  const el = h('div', { class: 'guidePrompt paper' }, h('b', {}, 'New here?'), ' ',
+    h('button', { class: 'btn dark', onclick: () => { el.remove(); tutOpen(0); TUT.auto = true; tutRender(); } }, '▶ Watch the 2-minute walkthrough'),
+    h('button', { class: 'x', onclick: () => { el.remove(); store.set('guideSeen', true); } }, '×'));
+  $('#stageWrap').append(el);
+}
+function hudLegend() {
+  const el = $('#hudLegend'); if (!el) return;
+  const mob = S.mode === 'mobile', name = k => mob ? (k === 'L' ? 'Pad' : 'Hand') : (k === 'L' ? 'Left' : 'Right');
+  const lines = [];
+  for (const k of ['L', 'R']) {
+    const bits = S.routes.filter(r => r.on && r.hand === k && PARAMS[r.target]).map(r => `${SRC_LABEL[r.src]}${r.invert ? ' (closed)' : ''} → ${PARAMS[r.target].label.toLowerCase()}`);
+    if (S.voice.id !== 'none' && S.voice.hand === k) { const v = VOICES[S.voice.id]; bits.unshift(v.kind === 'cont' || v.kind === 'drone' ? `plays ${v.name.toLowerCase()} (${S.voice.axis === 'y' ? 'height' : 'side'} = pitch)` : `pinch plays ${v.name.toLowerCase()}`); }
+    if (bits.length) lines.push(h('div', {}, h('b', {}, name(k) + ': '), bits.join(' · ')));
+  }
+  const signs = []; for (const k of ['L', 'R']) for (const po in ((S.poses || {})[k] || {})) { const a = S.poses[k][po]; if (a && a !== 'none') signs.push(`${mob ? '' : (k === 'L' ? 'L' : 'R')}${(POSE_LABEL[po] || '').split(' ')[0]} ${ACTIONS[a].replace('Loop: ', '').toLowerCase()}`); }
+  if (signs.length) lines.push(h('div', { class: 'signs' }, signs.join('  ·  ')));
+  el.innerHTML = ''; lines.forEach(l => el.append(l));
 }
 
 /* =====================================================================
@@ -1131,7 +1739,7 @@ function setupTabs() {
   const tabsEl = desk ? $('#tabs') : $('#mtabs'); panelEl = desk ? $('#panel') : $('#mpanel');
   const list = desk ? TABS_DESK : TABS_MOB; curTab = desk ? 'rack' : 'presets';
   tabsEl.innerHTML = '';
-  for (const [id, label] of list) tabsEl.append(h('div', { class: 'tab' + (id === curTab ? ' sel' : ''), 'data-tab': id, onclick: e => { curTab = id; tabsEl.querySelectorAll('.tab').forEach(t => t.classList.toggle('sel', t.dataset.tab === id)); renderPanel(); } }, label));
+  for (const [id, label] of list) tabsEl.append(h('div', { class: 'tab' + (id === curTab ? ' sel' : ''), 'data-tab': id, onclick: e => { curTab = id; if (TUT.active && id !== 'threads') {} tabsEl.querySelectorAll('.tab').forEach(t => t.classList.toggle('sel', t.dataset.tab === id)); renderPanel(); } }, label));
   renderPanel();
 }
 function paramSlider(id, opts = {}) {
@@ -1151,13 +1759,17 @@ function renderPanel() {
       h('div', { class: 'fxhead' }, h('b', {}, p.name)), h('div', { style: 'font-size:15px;line-height:1.3' }, p.blurb || ''))));
   }
   if (t === 'rack') {
-    el.append(h('div', { class: 'hint' }, mob ? 'Switch effects on or off and set where they rest. Your hand moves them from there.' : 'Every effect in the chain, top to bottom. Sliders set where each one rests, and the red tick shows your hands and the weather moving it.'));
+    el.append(h('div', { class: 'hint' }, mob ? 'Switch effects on or off and set where they rest. Your hand moves them from there.' : 'Every effect in the chain, top to bottom. An effect that\u2019s switched off is taken out of the chain and uses no CPU. Sliders set where each one rests, and the red tick shows your hands and the weather moving it.'));
+    el.append(h('h4', {}, 'Sources'));
+    el.append(h('div', { style: 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px' },
+      h('button', { class: 'btn' + (S.micOn ? ' dark' : ''), onclick: () => toggleMic().then(renderPanel) }, S.micOn ? '🎙 Mic on' : '🎙 Mic off'),
+      h('button', { class: 'btn' + (DEMO.on ? ' dark' : ''), onclick: () => { demoSet(!DEMO.on); renderPanel(); } }, DEMO.on ? '♪ Demo singer on' : '♪ Demo singer off')));
     el.append(h('h4', {}, 'Main'));
     ['master.vol', 'mic.gain', 'voice.vol', 'loops.vol', 'backing.vol'].forEach(id => el.append(paramSlider(id)));
     el.append(h('h4', {}, 'The rack'));
     for (const f of FX) {
       const on = !!S.fxOn[f.id];
-      const tg = h('div', { class: 'toggle' + (on ? ' on' : ''), onclick: () => { S.fxOn[f.id] = !S.fxOn[f.id]; forceApply(`fx.${f.id}.mix`); renderPanel(); } });
+      const tg = h('div', { class: 'toggle' + (on ? ' on' : ''), onclick: () => { setFx(f.id, !S.fxOn[f.id]); renderPanel(); hudLegend(); } });
       const card = h('div', { class: 'fxcard' + (on ? '' : ' off') }, h('div', { class: 'swatch', style: `background:${f.color}` }),
         h('div', { class: 'fxhead' }, h('b', {}, f.name, f.sub ? h('span', { style: 'font-family:var(--hand);font-size:17px;color:var(--faint)' }, '  ' + f.sub) : ''), tg));
       f.params.forEach(([k, label]) => { if (mob && k !== 'mix') return; card.append(paramSlider(`fx.${f.id}.${k}`, { label })); });
@@ -1203,7 +1815,7 @@ function renderThreads(el, mob) {
         h('label', { title: 'smoothing' }, '〰 ', h('input', { type: 'range', min: 0, max: 95, value: r.smooth * 100, style: 'width:70px;vertical-align:middle', oninput: e => r.smooth = e.target.value / 100 })),
         h('label', { title: 'MIDI CC out' }, 'CC ', h('input', { type: 'number', min: 0, max: 119, value: r.cc, style: 'width:46px', onchange: e => r.cc = +e.target.value })))));
   });
-  el.append(h('button', { class: 'btn dark', onclick: () => { S.routes.push(normRoute({ hand: mob ? 'R' : 'L', src: 'y', target: 'fx.rev.mix' }, S.routes.length)); renderPanel(); } }, '＋ Add a thread'));
+  el.append(h('button', { class: 'btn dark', onclick: () => { hudLegend(); S.routes.push(normRoute({ hand: mob ? 'R' : 'L', src: 'y', target: 'fx.rev.mix' }, S.routes.length)); renderPanel(); } }, '＋ Add a thread'));
   // poses
   el.append(h('h4', {}, 'Hand signs'));
   el.append(h('div', { class: 'hint' }, `Hold a sign for ${S.settings.poseHold}ms to trigger it.`));
@@ -1278,17 +1890,27 @@ function renderSettings(el, mob) {
   const g = h('div', { class: 'grid2' });
   const tg = (key, after) => h('div', { class: 'toggle' + (S.settings[key] ? ' on' : ''), onclick: e => { S.settings[key] = !S.settings[key]; e.target.classList.toggle('on', S.settings[key]); saveSettings(); after && after(); } });
   const rng = (key, mn, mx, step, after) => h('input', { type: 'range', min: mn, max: mx, step, value: S.settings[key], oninput: e => { S.settings[key] = +e.target.value; saveSettings(); after && after(); } });
-  g.append(h('span', {}, 'Hear yourself live'), tg('monitor', () => ramp(A.live.gain, S.settings.monitor ? 1 : 0)));
+  g.append(h('span', {}, 'Hear yourself live'), tg('monitor', () => glide(A.live.gain, S.settings.monitor ? 1 : 0)));
   g.append(h('span', {}, 'Speaker mode (echo cancel)'), tg('speakerMode', () => { if (S.micOn) { stopMic(); startMic(); } }));
-  g.append(h('span', {}, 'Mirror camera'), tg('mirror'));
+  g.append(h('span', {}, 'Mirror camera'), tg('mirror', applyVideoStyle));
   if (!mob) g.append(h('span', {}, 'Swap left / right'), tg('swap'));
-  g.append(h('span', {}, 'Show camera'), tg('showVideo'));
+  g.append(h('span', {}, 'Show camera'), tg('showVideo', applyVideoStyle));
   g.append(h('span', {}, 'Show hand ink'), tg('showSkeleton'));
-  g.append(h('span', {}, 'Camera fade'), rng('videoAlpha', .2, 1, .05));
-  g.append(h('span', {}, 'Watercolor'), rng('paint', 0, 1, .05));
+  g.append(h('span', {}, 'Camera fade'), rng('videoAlpha', .2, 1, .05, applyVideoStyle));
+  g.append(h('span', {}, 'Watercolor'), rng('paint', 0, 1, .05, applyVideoStyle));
   g.append(h('span', {}, 'Sign hold (ms)'), rng('poseHold', 150, 1200, 50, () => {}));
   g.append(h('span', {}, 'Mouse / touch plays hands'), h('div', { class: 'toggle' + (S.pointerHands ? ' on' : ''), onclick: e => { S.pointerHands = !S.pointerHands; e.target.classList.toggle('on', S.pointerHands); } }));
   el.append(h('h4', {}, 'Feel'), g);
+  const pf = h('div', { class: 'grid2' });
+  pf.append(h('span', {}, 'Performance'), sel({ auto: 'Auto (steps down if slow)', lite: 'Light (30 fps, no watercolour)', balanced: 'Balanced', full: 'Full (sharpest)' }, S.settings.quality || 'auto', v => { S.settings.quality = v; saveSettings(); initQuality(); resize(); }));
+  pf.append(h('span', {}, 'Show speed readout'), tg('perfHud'));
+  pf.append(h('span', {}, 'Sound strip (bottom)'), tg('scope', () => { $('#scope').style.display = S.settings.scope ? 'block' : 'none'; resize(); }));
+  if (!mob) pf.append(h('span', {}, 'Who is left / right'), sel({ hand: 'by the hand itself (cross freely)', side: 'by screen side' }, S.settings.identity || 'hand', v => { S.settings.identity = v; saveSettings(); }));
+  el.append(h('h4', {}, 'Speed'), h('div', { class: 'hint' }, 'Hand tracking runs off the main thread, effects that are off use no CPU, and the camera look is done by the graphics card. If it still drags, choose Light.'), pf);
+  const art = h('input', { type: 'file', accept: 'image/*', style: 'display:none', onchange: e => { const f = e.target.files[0]; if (f) skinFromImage(f).catch(() => toast('Could not read that image')); e.target.value = ''; } });
+  el.append(h('h4', {}, 'Album skin'), h('div', { class: 'hint' }, 'Drop in album art and the whole loom (ink, paper, effect colours, the spectrum strip) takes on its palette.'),
+    h('div', { style: 'display:flex;gap:8px;align-items:center;flex-wrap:wrap' }, h('div', { class: 'artThumb', style: 'width:56px;height:56px;background-size:cover;border:1.5px solid var(--ink);border-radius:4px;' + (SKIN.art ? `background-image:url(${SKIN.art})` : 'display:none') }), art,
+      h('button', { class: 'btn dark', onclick: () => art.click() }, 'Choose album art'), h('button', { class: 'btn', onclick: () => { store.set('skin', null); applySkin(null); renderPanel(); } }, 'Back to parchment')));
   // devices
   const dv = h('div', { class: 'grid2' });
   el.append(h('h4', {}, 'Devices'), dv);
@@ -1307,7 +1929,7 @@ function renderSettings(el, mob) {
   el.append(h('div', { class: 'hint' }, `You're in ${S.mode === 'mobile' ? 'phone (one hand)' : 'computer (two hands)'} mode.`), h('button', { class: 'btn', onclick: () => { store.set('mode', S.mode === 'mobile' ? 'desktop' : 'mobile'); location.reload(); } }, 'Switch to ' + (S.mode === 'mobile' ? 'computer' : 'phone') + ' mode'));
   if (!mob) {
     el.append(h('h4', {}, 'Keys'));
-    el.append(h('div', { style: 'font-size:15px;line-height:1.8' }, h('kbd', {}, 'Space'), ' loop  ', h('kbd', {}, 'Z'), ' undo  ', h('kbd', {}, '← →'), ' presets  ', h('kbd', {}, 'F'), ' freeze  ', h('kbd', {}, 'M'), ' mic  ', h('kbd', {}, '1–0'), ' toggle effects'));
+    el.append(h('div', { style: 'font-size:15px;line-height:1.8' }, h('kbd', {}, '?'), ' guide  ', h('kbd', {}, 'Space'), ' loop  ', h('kbd', {}, 'Z'), ' undo  ', h('kbd', {}, '← →'), ' presets  ', h('kbd', {}, 'F'), ' freeze  ', h('kbd', {}, 'M'), ' mic  ', h('kbd', {}, '1–0'), ' toggle effects'));
   }
 }
 async function restartCamera() {
@@ -1326,6 +1948,7 @@ function updateTopbar() {
   $('#freezeBtn').classList.toggle('on', S.frozen); $('#mFreeze').classList.toggle('dark', S.frozen);
   $('#micBtn').classList.toggle('on', S.micOn); $('#mMic').classList.toggle('dark', S.micOn);
   $('#takeBtn').classList.toggle('rec', S.takeOn);
+  $('#demoBtn').classList.toggle('on', DEMO.on);
 }
 
 /* ---------------- modal (save / export) ---------------- */
@@ -1366,20 +1989,32 @@ function ioDialog() {
    ===================================================================== */
 let lastT = performance.now(), uiAcc = 0;
 function frame(now) {
-  const dt = Math.min(.1, (now - lastT) / 1000); lastT = now;
-  if (S.trackerReady) { if (S.mode !== 'mobile' || (frame.n = (frame.n || 0) + 1) % 1 === 0) detect(now); }
+  const dtMs = now - lastT, dt = Math.min(.1, dtMs / 1000); lastT = now;
+  perfWatch(dtMs, now);
+  detect(now);
   expireHands(now);
+  tutTick(dt);
   updateVoice(dt);
   modTick(dt);
   if (TRK.video && TRK.video.videoWidth && (VIEW._vw !== TRK.video.videoWidth)) { VIEW._vw = TRK.video.videoWidth; computeView(); }
-  draw(dt);
-  uiAcc += dt; if (uiAcc > .08) { uiAcc = 0; updateLive(); }
+  const q = Q();
+  if (now - PERF.lastDraw >= 1000 / q.fps - 2) { const t0 = performance.now(); draw((now - (PERF.lastDraw || now)) / 1000, now); PERF.lastDraw = now; PERF.drawMs = lerp(PERF.drawMs, performance.now() - t0, .1); }
+  scopeTick(now);
+  uiAcc += dt; if (uiAcc > .1) { uiAcc = 0; updateLive(); perfChip(); }
   requestAnimationFrame(frame);
+}
+function perfChip() {
+  const el = $('#modeBadge'); if (!el) return;
+  const base = (S.mode === 'mobile' ? 'phone · one hand + pad' : 'computer · two hands') + (S.trackerReady ? '' : ' · mouse/touch hands');
+  if (!S.settings.perfHud) { el.textContent = base; return; }
+  let lat = ''; try { const ctx = Tone.getContext().rawContext; lat = ` · audio ${Math.round(((ctx.baseLatency || 0) + (ctx.outputLatency || 0)) * 1000)}ms`; } catch (e) {}
+  el.textContent = `${Math.round(PERF.fps)} fps · draw ${PERF.drawMs.toFixed(1)}ms · hands ${S.trackerReady ? Math.round(TRK.hz) + 'Hz/' + TRK.ms.toFixed(0) + 'ms (' + TRK.mode + ')' : 'off'}${lat} · ${Q().label}`;
 }
 function wireTopbar() {
   $('#presetSel').addEventListener('change', e => { const p = allPresets().find(x => x.name === e.target.value); if (p) applyPreset(p); e.target.blur(); });
   $('#prevP').onclick = () => presetStep(-1); $('#nextP').onclick = () => presetStep(1);
   $('#recBtn').onclick = loopToggle; $('#undoBtn').onclick = loopUndo; $('#freezeBtn').onclick = toggleFreeze; $('#micBtn').onclick = toggleMic; $('#takeBtn').onclick = takeToggle;
+  $('#demoBtn').onclick = () => demoSet(!DEMO.on); $('#guideBtn').onclick = () => TUT.active ? tutClose() : tutOpen(0);
   $('#saveBtn').onclick = savePresetDialog; $('#ioBtn').onclick = ioDialog;
   $('#mRec').onclick = loopToggle; $('#mUndo').onclick = loopUndo; $('#mFreeze').onclick = toggleFreeze; $('#mMic').onclick = toggleMic;
   $('#mMore').onclick = () => { $('#sheet').classList.add('open'); renderPanel(); };
@@ -1389,41 +2024,46 @@ function wireTopbar() {
     if (/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName) && e.key !== 'Escape') return;
     if (e.code === 'Space') { e.preventDefault(); loopToggle(); }
     else if (e.key === 'z' || e.key === 'Z' || e.key === 'Backspace') loopUndo();
-    else if (e.key === 'ArrowRight') presetStep(1); else if (e.key === 'ArrowLeft') presetStep(-1);
+    else if (e.key === 'ArrowRight') TUT.active ? tutGo(TUT.i + 1) : presetStep(1); else if (e.key === 'ArrowLeft') TUT.active ? tutGo(TUT.i - 1) : presetStep(-1);
     else if (e.key === 'f' || e.key === 'F') toggleFreeze(); else if (e.key === 'm' || e.key === 'M') toggleMic();
+    else if (e.key === '?' || e.key === 'h' || e.key === 'H') TUT.active ? tutClose() : tutOpen(0);
     else if (/^[0-9]$/.test(e.key)) { const i = (+e.key + 9) % 10; if (FX[i]) runAction('fx.' + FX[i].id); }
-    else if (e.key === 'Escape') { $('#modal').classList.add('hidden'); $('#sheet').classList.remove('open'); }
+    else if (e.key === 'Escape') { $('#modal').classList.add('hidden'); $('#sheet').classList.remove('open'); if (TUT.active) tutClose(); }
   });
 }
-async function start() {
+async function start(withGuide) {
   const msg = t => $('#loadmsg').textContent = t;
-  $('#startBtn').disabled = true;
-  try { await Tone.start(); } catch (e) {}
+  $('#startBtn').disabled = true; $('#watchBtn').disabled = true;
   if (typeof Tone === 'undefined') { msg('Could not load the sound engine. Check your connection.'); return; }
+  // low-latency context before anything is built
+  try { Tone.setContext(new Tone.Context({ latencyHint: 'interactive', lookAhead: 0 })); } catch (e) {}
+  try { await Tone.start(); } catch (e) {}
   msg('tuning the rack…');
   document.body.classList.toggle('mobile', S.mode === 'mobile');
   store.set('mode', S.mode);
-  try { Tone.getContext().latencyHint; } catch (e) {}
+  initQuality();
   await buildAudio();
-  ramp(A.live.gain, S.settings.monitor ? 1 : 0);
+  glide(A.live.gain, S.settings.monitor ? 1 : 0);
   S.poses = store.get('poses.' + S.mode, null) || defaultPoses();
   await libInit();
-  setupPainter(); setupPointers(); wireTopbar();
+  setupPainter(); setupScope(); setupPointers(); wireTopbar();
   await initTracking(msg);
-  if (!S.sandbox) { msg('opening the mic…'); await startMic(); }
+  if (!S.sandbox && !withGuide) { msg('opening the mic…'); await startMic(); }
   $('#splash').classList.add('hidden'); $('#app').classList.remove('hidden');
   resize(); S.started = true;
   fillPresetSelect();
   const last = store.get('lastPreset', 'Save Me'); applyPreset(allPresets().find(p => p.name === last) || PRESETS[0]);
   setupTabs(); updateTopbar();
-  $('#modeBadge').textContent = (S.mode === 'mobile' ? 'phone · one hand + pad' : 'computer · two hands') + (S.trackerReady ? '' : ' · mouse/touch hands');
-  if (S.pointerHands) toast(S.mode === 'mobile' ? 'Touch the stage to play the right hand, and use the pad for the left.' : 'Hover to move a hand and press to pinch. The left half of the stage is your left hand, the right half your right.', 4500);
+  if (S.sandbox || withGuide) demoSet(true);
+  if (S.pointerHands && !withGuide) toast(S.mode === 'mobile' ? 'Touch the stage to play the hand, and use the pad for the left.' : 'Hover to move a hand and press to pinch. The left half of the stage is your left hand, the right half your right.', 4500);
   requestAnimationFrame(frame);
+  if (withGuide) { tutOpen(0); TUT.auto = true; tutRender(); } else guidePrompt();
   if ('serviceWorker' in navigator && location.protocol === 'https:' && !IN_FRAME && !window.Capacitor) navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
 /* ---------- splash wiring ---------- */
 (function boot() {
+  applySkin(store.get('skin', null));
   const touch = matchMedia('(pointer:coarse)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
   S.mode = store.get('mode', touch ? 'mobile' : 'desktop');
   S.sandbox = IN_FRAME && !(window.HANDLOOM_ALLOW_FRAME) && (() => { try { return !!(document.featurePolicy && !document.featurePolicy.allowsFeature('camera')); } catch (e) { return false; } })();
@@ -1433,10 +2073,13 @@ async function start() {
   const sync = () => document.querySelectorAll('.mode').forEach(b => b.classList.toggle('sel', b.dataset.mode === S.mode));
   document.querySelectorAll('.mode').forEach(b => b.onclick = () => { S.mode = b.dataset.mode; sync(); });
   sync();
-  $('#startBtn').onclick = () => start().catch(e => { console.error(e); $('#loadmsg').textContent = 'Something snagged: ' + e.message; $('#startBtn').disabled = false; });
+  const go = g => start(g).catch(e => { console.error(e); $('#loadmsg').textContent = 'Something snagged: ' + e.message; $('#startBtn').disabled = false; $('#watchBtn').disabled = false; });
+  $('#startBtn').onclick = () => go(false);
+  $('#watchBtn').onclick = () => go(true);
 })();
 // debugging / testing hook
-window.HANDLOOM = { S, A, L, PARAMS, ingest: (lms) => ingest(lms.map(lm => ({ lm })), performance.now(), 'cam'), applyPreset, PRESETS, loopToggle, setVoice };
+window.HANDLOOM = { S, A, L, PARAMS, TUT, TRK, PERF, DEMO, ingest: (lms) => ingest(lms.map(lm => ({ lm })), performance.now(), 'cam'), applyPreset, PRESETS, loopToggle, setVoice, tutOpen, tutGo, tutClose, setFx, demoSet, Q };
+
 </script>
 </body>
 </html>
